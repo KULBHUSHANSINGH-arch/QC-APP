@@ -1,22 +1,35 @@
-import 'package:newqcm/AddQuality.dart';
-import 'package:newqcm/CommonDrawer.dart';
-import 'package:newqcm/Fqc.dart';
-import 'package:newqcm/Ipqc.dart';
-import 'package:newqcm/Iqcp.dart';
-import 'package:newqcm/Welcomepage.dart';
-import 'package:newqcm/components/appbar.dart';
-import 'package:newqcm/constant/app_color.dart';
-import 'package:newqcm/constant/app_fonts.dart';
-import 'package:newqcm/constant/app_styles.dart';
-import 'package:newqcm/directory.dart';
+// import 'package:QCM/AddQuality.dart';
+// import 'package:QCM/CommonDrawer.dart';
+// import 'package:QCM/Fqc.dart';
+// import 'package:QCM/IPQCCheckSheetList.dart';
+// import 'package:QCM/Ipqc.dart';
+// import 'package:QCM/Iqcp.dart';
+// import 'package:QCM/Welcomepage.dart';
+// import 'package:QCM/components/appbar.dart';
+// import 'package:QCM/constant/app_color.dart';
+// import 'package:QCM/constant/app_fonts.dart';
+// import 'package:QCM/constant/app_styles.dart';
+// import 'package:QCM/directory.dart';
 import 'package:flutter/material.dart';
+import 'package:qcmapp/AddQuality.dart';
+import 'package:qcmapp/CommonDrawer.dart';
+import 'package:qcmapp/Fqc.dart';
+import 'package:qcmapp/IPQCCheckSheetList.dart';
+import 'package:qcmapp/Ipqc.dart';
+import 'package:qcmapp/Iqcp.dart';
+import 'package:qcmapp/Welcomepage.dart';
+import 'package:qcmapp/components/appbar.dart';
+import 'package:qcmapp/constant/app_color.dart';
+import 'package:qcmapp/constant/app_fonts.dart';
+import 'package:qcmapp/constant/app_styles.dart';
+import 'package:qcmapp/directory.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // import '../BoxCricket.dart';
 import '../constant/app_assets.dart';
 import '../main.dart';
 
 class QualityPage extends StatefulWidget {
-  const QualityPage({super.key});
+  QualityPage({Key? key}) : super(key: key);
 
   @override
   _QualityPageState createState() => _QualityPageState();
@@ -122,15 +135,39 @@ class _QualityPageState extends State<QualityPage> {
                 const SizedBox(
                   width: 10,
                 ),
-                // Expanded(
-                //     child:
-                //         tabDashboard('Quality Check', AppAssets.qualityadd, () {
-                //   Navigator.of(context).pushAndRemoveUntil(
-                //       MaterialPageRoute(
-                //           builder: (BuildContext context) =>
-                //               AddQuality(id: "")),
-                //       (Route<dynamic> route) => false);
-                // })),
+                Expanded(
+                    child:
+                        tabDashboard('Quality Check', AppAssets.qualityadd, () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              AddQuality(id: "")),
+                      (Route<dynamic> route) => false);
+                })),
+                const SizedBox(
+                  width: 10,
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(
+                  width: 10,
+                ),
+                Expanded(
+                    child: tabDashboard(
+                        'InLine Check Sheet', AppAssets.imgRight, () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              IPQCCheckSheetList()),
+                      (Route<dynamic> route) => false);
+                })),
                 const SizedBox(
                   width: 10,
                 ),
@@ -236,7 +273,7 @@ class _QualityPageState extends State<QualityPage> {
                 child: Material(
                   shape: RoundedRectangleBorder(),
                   clipBehavior: Clip.hardEdge,
-                  child: Image.asset(AppAssets.icDashboard,
+                  child: new Image.asset(AppAssets.icDashboard,
                       height: 18.0, width: 18.0, color: AppColors.greyColor),
                 ),
               ),
@@ -378,7 +415,7 @@ Widget tabDashboard(String title, String img, final Function onPressed) {
                 height: 15,
               ),
               Center(
-                  child: SizedBox(
+                  child: Container(
                       height: 36,
                       width: 36,
                       child: Image.asset(

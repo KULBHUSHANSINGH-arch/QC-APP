@@ -20,8 +20,8 @@ class UserModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['status'] = status;
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['status'] = this.status;
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
@@ -42,6 +42,7 @@ class UserData {
   String? materialName;
   String? date;
   String? shift;
+  String? PdfURL;
 
   UserData(
       {this.employeeID,
@@ -55,7 +56,8 @@ class UserData {
       this.moduleNo,
       this.materialName,
       this.date,
-      this.shift});
+      this.shift,
+      this.PdfURL});
 
   UserData.fromJson(Map<String, dynamic> json) {
     employeeID = json['EmployeeID'];
@@ -70,22 +72,24 @@ class UserData {
     materialName = json['MaterialName'];
     date = json['Date'];
     shift = json['Shift'];
+    PdfURL = json['PdfURL'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['EmployeeID'] = employeeID;
-    data['Name'] = name;
-    data['ProfileImg'] = profileImg;
-    data['Location'] = location;
-    data['Type'] = type;
-    data['ExcelURL'] = excelURL;
-    data['ReferencePdf'] = referencePdf;
-    data['JobCardDetailID'] = jobCardDetailID;
-    data['ModuleNo'] = moduleNo;
-    data['MaterialName'] = materialName;
-    data['Date'] = date;
-    data['Shift'] = shift;
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['EmployeeID'] = this.employeeID;
+    data['Name'] = this.name;
+    data['ProfileImg'] = this.profileImg;
+    data['Location'] = this.location;
+    data['Type'] = this.type;
+    data['ExcelURL'] = this.excelURL;
+    data['ReferencePdf'] = this.referencePdf;
+    data['JobCardDetailID'] = this.jobCardDetailID;
+    data['ModuleNo'] = this.moduleNo;
+    data['MaterialName'] = this.materialName;
+    data['Date'] = this.date;
+    data['Shift'] = this.shift;
+    data['PdfURL'] = this.PdfURL;
     return data;
   }
 }

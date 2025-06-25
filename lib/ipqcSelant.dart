@@ -1,25 +1,35 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:newqcm/Ipqc.dart';
-import 'package:newqcm/components/app_loader.dart';
-import 'package:newqcm/components/appbar.dart';
-import 'package:newqcm/ipqcTestList.dart';
+// import 'package:QCM/Ipqc.dart';
+// import 'package:QCM/components/app_loader.dart';
+// import 'package:QCM/components/appbar.dart';
+// import 'package:QCM/ipqcTestList.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:qcmapp/Ipqc.dart';
+import 'package:qcmapp/components/app_button_widget.dart';
+import 'package:qcmapp/components/app_loader.dart';
+import 'package:qcmapp/components/appbar.dart';
+import 'package:qcmapp/constant/app_assets.dart';
+import 'package:qcmapp/constant/app_color.dart';
+import 'package:qcmapp/constant/app_fonts.dart';
+import 'package:qcmapp/constant/app_helper.dart';
+import 'package:qcmapp/constant/app_styles.dart';
+import 'package:qcmapp/ipqcTestList.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:intl/intl.dart';
-import 'package:newqcm/components/app_button_widget.dart';
+// import 'package:QCM/components/app_button_widget.dart';
 import 'package:http/http.dart' as http;
 import 'package:dio/src/response.dart' as Response;
-import 'package:newqcm/constant/app_assets.dart';
-import 'package:newqcm/constant/app_color.dart';
-import 'package:newqcm/constant/app_fonts.dart';
-import 'package:newqcm/constant/app_helper.dart';
-import 'package:newqcm/constant/app_styles.dart';
+// import 'package:QCM/constant/app_assets.dart';
+// import 'package:QCM/constant/app_color.dart';
+// import 'package:QCM/constant/app_fonts.dart';
+// import 'package:QCM/constant/app_helper.dart';
+// import 'package:QCM/constant/app_styles.dart';
 import 'package:toast/toast.dart';
 
 class ipqcSelant extends StatefulWidget {
@@ -62,9 +72,12 @@ class _ipqcSelantState extends State<ipqcSelant> {
   bool? isCycleTimeTrue;
   bool? isBacksheetCuttingTrue;
   List<int>? referencePdfFileBytes;
+
+  List locationList = [];
   String selectedShift = "Day Shift";
   String sendStatus = "";
   String status = '',
+      WorkLocation = '',
       jobCarId = '',
       approvalStatus = "Approved",
       designation = '',
@@ -140,8 +153,49 @@ class _ipqcSelantState extends State<ipqcSelant> {
       designation = prefs.getString('designation')!;
       department = prefs.getString('department')!;
       token = prefs.getString('token')!;
+      WorkLocation = prefs.getString('workLocation')!;
     });
     _get();
+    getLocationData();
+  }
+
+  getLocationData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    site = prefs.getString('site')!;
+    print("site URL: $site");
+
+    if (site == null) {
+      print('Site URL is null or empty.');
+      return;
+    }
+
+    final url = (site! + 'Employee/WorkLocationList');
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        var designationBody = jsonDecode(response.body);
+        print("Location List: $designationBody");
+
+        if (mounted) {
+          setState(() {
+            locationList = designationBody['data'];
+          });
+          print("locationList: $locationList");
+        }
+      } else {
+        print("Failed to load data: ${response.statusCode}");
+      }
+    } catch (e) {
+      print('Error fetching location data: $e');
+    }
   }
 
   Future _get() async {
@@ -179,6 +233,8 @@ class _ipqcSelantState extends State<ipqcSelant> {
                   DateTime.parse(resBody['response']['Date'].toString()))
               : '';
           selectedShift = resBody['response']['Shift'] ?? '';
+          WorkLocation = resBody['response']['WorkLocation'] ?? '';
+
           // Long Frame
           LongAController.text =
               resBody['response']['LongFrame_WithoutSealant'] ?? '';
@@ -289,6 +345,7 @@ class _ipqcSelantState extends State<ipqcSelant> {
       "DocNo": "GSPL/IPQC/SP/012",
       "RevNo": "1.0/12.08.2023",
       "Date": dateOfQualityCheck,
+      'WorkLocation': WorkLocation,
       "Shift": selectedShift,
       "Stages": [
         {
@@ -575,6 +632,61 @@ class _ipqcSelantState extends State<ipqcSelant> {
                                     const SizedBox(
                                       height: 15,
                                     ),
+                                    if (designation == "Super Admin")
+                                      Text(
+                                        "Work Location",
+                                        style:
+                                            AppStyles.textfieldCaptionTextStyle,
+                                      ),
+                                    if (designation == "Super Admin")
+                                      const SizedBox(
+                                        height: 4,
+                                      ),
+                                    if (designation == "Super Admin")
+                                      DropdownButtonFormField<String>(
+                                        decoration: AppStyles
+                                            .textFieldInputDecoration
+                                            .copyWith(
+                                          hintText: "Select Work Location",
+                                          counterText: '',
+                                          contentPadding: EdgeInsets.all(10),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                20), // Rounded borders
+                                          ),
+                                        ),
+                                        items: locationList
+                                            .map((label) => DropdownMenuItem(
+                                                  child: Text(
+                                                    label['workLocationName'],
+                                                    style: AppStyles
+                                                        .textInputTextStyle,
+                                                  ),
+                                                  value: label['workLocationId']
+                                                      .toString(),
+                                                ))
+                                            .toList(),
+                                        onChanged: designation != "Super Admin"
+                                            ? null
+                                            : (val) {
+                                                setState(() {
+                                                  WorkLocation = val!;
+                                                });
+                                              },
+                                        value: WorkLocation != ''
+                                            ? WorkLocation
+                                            : null,
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'Please Select Work Location';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                    if (designation == "Super Admin")
+                                      const SizedBox(
+                                        height: 15,
+                                      ),
                                     Text(
                                       "Date",
                                       style:

@@ -1,25 +1,49 @@
-import 'package:newqcm/CommonDrawer.dart';
-import 'package:newqcm/Fqc.dart';
-import 'package:newqcm/FqcTestList.dart';
-import 'package:newqcm/Ipqc.dart';
-import 'package:newqcm/Iqcp.dart';
-import 'package:newqcm/IqcpTestList.dart';
-import 'package:newqcm/QualityList.dart';
-import 'package:newqcm/QualityPage.dart';
-import 'package:newqcm/components/appbar.dart';
-import 'package:newqcm/constant/app_color.dart';
-import 'package:newqcm/constant/app_fonts.dart';
-import 'package:newqcm/constant/app_styles.dart';
-import 'package:newqcm/directory.dart';
-import 'package:newqcm/ipqcTestList.dart';
+import 'dart:convert';
+
+// import 'package:QCM/CapaReport.dart';
+// import 'package:QCM/CommonDrawer.dart';
+// import 'package:QCM/Fqc.dart';
+// import 'package:QCM/FqcNewTestList.dart';
+// import 'package:QCM/FqcTestList.dart';
+// import 'package:QCM/IPQCCheckSheetList.dart';
+// import 'package:QCM/Ipqc.dart';
+// import 'package:QCM/Iqcp.dart';
+// import 'package:QCM/IqcpTestList.dart';
+// import 'package:QCM/QualityList.dart';
+// import 'package:QCM/QualityPage.dart';
+// import 'package:QCM/capaList.dart';
+// import 'package:QCM/components/appbar.dart';
+// import 'package:QCM/constant/app_color.dart';
+// import 'package:QCM/constant/app_fonts.dart';
+// import 'package:QCM/constant/app_styles.dart';
+// import 'package:QCM/directory.dart';
+import 'package:http/http.dart' as http;
+
+// import 'package:QCM/ipqcTestList.dart';
 import 'package:flutter/material.dart';
+import 'package:qcmapp/CommonDrawer.dart';
+import 'package:qcmapp/FqcNewTestList.dart';
+import 'package:qcmapp/IPQCCheckSheetList.dart';
+import 'package:qcmapp/Ipqc.dart';
+import 'package:qcmapp/Iqcp.dart';
+import 'package:qcmapp/IqcpTestList.dart';
+import 'package:qcmapp/QualityList.dart';
+import 'package:qcmapp/QualityPage.dart';
+import 'package:qcmapp/capaList.dart';
+import 'package:qcmapp/components/appbar.dart';
+import 'package:qcmapp/constant/app_color.dart';
+import 'package:qcmapp/constant/app_fonts.dart';
+import 'package:qcmapp/constant/app_styles.dart';
+import 'package:qcmapp/directory.dart';
+import 'package:qcmapp/ipqcTestList.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:toast/toast.dart';
 // import '../BoxCricket.dart';
 import '../constant/app_assets.dart';
 import '../main.dart';
 
 class WelcomePage extends StatefulWidget {
-  const WelcomePage({super.key});
+  WelcomePage({Key? key}) : super(key: key);
 
   @override
   _WelcomePageState createState() => _WelcomePageState();
@@ -65,6 +89,8 @@ class _WelcomePageState extends State<WelcomePage> {
       ImagePath = prefs.getString('imagePath');
       vCard = prefs.getString('Vcard');
     });
+    getStatus();
+
     // getFromStringmap();
   }
 
@@ -72,6 +98,44 @@ class _WelcomePageState extends State<WelcomePage> {
   void initState() {
     super.initState();
     store();
+  }
+
+  void getStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    site = prefs.getString('site');
+    final url = (site!) + 'Employee/CheckActive';
+    var response = await http.post(
+      Uri.parse(url),
+      body: jsonEncode(<String, String>{"personid": personid!}),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+    print("Response.....");
+    print(response.body);
+    if (response.statusCode == 200) {
+      var objData = json.decode(response.body);
+      print(objData['status']);
+      if (objData['status'] == "Inactive" ||
+          objData['versionName'] != VersionNo) {
+        prefs.remove('site');
+
+        prefs.remove('personid');
+        prefs.remove('fullname');
+        prefs.remove('department');
+        prefs.remove('pic');
+
+        prefs.setBool('islogin', false);
+        prefs.remove('designation');
+        prefs.remove('versionNo');
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (BuildContext context) => MyApp()),
+            (Route<dynamic> route) => false);
+      }
+      return;
+    } else {
+      throw Exception('Failed To Fetch Data');
+    }
   }
 
   adminbuttons() {
@@ -94,6 +158,7 @@ class _WelcomePageState extends State<WelcomePage> {
 
   @override
   Widget build(BuildContext context) {
+    ToastContext().init(context);
     return Scaffold(
       backgroundColor: AppColors.lightBlack,
       appBar: GautamAppBar(
@@ -103,11 +168,11 @@ class _WelcomePageState extends State<WelcomePage> {
         imgPath: "ImagePath",
         memberPic: pic,
         logo: "logo",
-        // onTap: () {
-        //   Navigator.push(context, MaterialPageRoute(builder: (context) {
-        //     return EmployeeList();
-        //   }));
-        // },
+        onTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return EmployeeList();
+          }));
+        },
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -125,20 +190,20 @@ class _WelcomePageState extends State<WelcomePage> {
                   const SizedBox(
                     width: 10,
                   ),
-                  // Expanded(
-                  //     child: tabDashboard(
-                  //         'IQCP',
-                  //         designation != 'Super Admin'
-                  //             ? AppAssets.IQCP
-                  //             : AppAssets.icApproved, () {
-                  //   Navigator.of(context).pushAndRemoveUntil(
-                  //       MaterialPageRoute(
-                  //           builder: (BuildContext context) =>
-                  //               designation != 'Super Admin'
-                  //                   ? IqcpPage()
-                  //                   : IqcpTestList()),
-                  //       (Route<dynamic> route) => false);
-                  // })),
+                  Expanded(
+                      child: tabDashboard(
+                          'IQCP',
+                          designation != 'Super Admin'
+                              ? AppAssets.IQCP
+                              : AppAssets.icApproved, () {
+                    Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                designation != 'Super Admin'
+                                    ? IqcpPage()
+                                    : IqcpTestList()),
+                        (Route<dynamic> route) => false);
+                  })),
                   const SizedBox(
                     width: 10,
                   ),
@@ -212,20 +277,102 @@ class _WelcomePageState extends State<WelcomePage> {
                   const SizedBox(
                     width: 10,
                   ),
-                  // Expanded(
-                  //     child: tabDashboard(
-                  //         'QUALITY',
-                  //         designation != 'Super Admin'
-                  //             ? AppAssets.qualityadd
-                  //             : AppAssets.quality, () {
-                  //   Navigator.of(context).pushAndRemoveUntil(
-                  //       MaterialPageRoute(
-                  //           builder: (BuildContext context) =>
-                  //               designation != 'Super Admin'
-                  //                   ? QualityPage()
-                  //                   : QualityList()),
-                  //       (Route<dynamic> route) => false);
-                  // })),
+                  Expanded(
+                      child: tabDashboard(
+                          'QUALITY',
+                          designation != 'Super Admin'
+                              ? AppAssets.qualityadd
+                              : AppAssets.quality, () {
+                    Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                designation != 'Super Admin'
+                                    ? QualityPage()
+                                    : QualityList()),
+                        (Route<dynamic> route) => false);
+                  })),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                      child: tabDashboard(
+                          'InLine Check Sheet', AppAssets.imgRight, () {
+                    Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                IPQCCheckSheetList()),
+                        (Route<dynamic> route) => false);
+                  })),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                      child: tabDashboard(
+                          'CAPA REPORT',
+                          designation != 'Super Admin'
+                              ? AppAssets.capa
+                              : AppAssets.capa, () {
+                    Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                designation != 'Super Admin'
+                                    ? capaList()
+                                    : capaList()),
+                        (Route<dynamic> route) => false);
+                  })),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                      child: tabDashboard(
+                          'FQC New',
+                          designation != 'Super Admin'
+                              ? AppAssets.fqc
+                              : AppAssets.fqc, () {
+                    Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                designation != 'Super Admin'
+                                    ? FQCNewList()
+                                    : FQCNewList()),
+                        (Route<dynamic> route) => false);
+                  })),
                   const SizedBox(
                     width: 10,
                   ),
@@ -248,13 +395,13 @@ class _WelcomePageState extends State<WelcomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             InkWell(
-                // onTap: () {
-                //   Navigator.of(context).pushReplacement(MaterialPageRoute(
-                //       builder: (BuildContext context) =>
-                //           department == 'IQCP' && designation != 'Super Admin'
-                //               ? IqcpPage()
-                //               : WelcomePage()));
-                // },
+                onTap: () {
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          department == 'IQCP' && designation != 'Super Admin'
+                              ? IqcpPage()
+                              : WelcomePage()));
+                },
                 child: Image.asset(
                     home
                         ? AppAssets.icHomeSelected
@@ -264,12 +411,12 @@ class _WelcomePageState extends State<WelcomePage> {
               width: 8,
             ),
             InkWell(
-                // onTap: () {
-                //   if (designation == 'Super Admin') {
-                //     Navigator.of(context).pushReplacement(MaterialPageRoute(
-                //         builder: (BuildContext context) => EmployeeList()));
-                //   }
-                // },
+                onTap: () {
+                  if (designation == 'Super Admin') {
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (BuildContext context) => EmployeeList()));
+                  }
+                },
                 child: Image.asset(
                     user ? AppAssets.imgSelectedPerson : AppAssets.imgPerson,
                     height: 25)),
@@ -306,9 +453,35 @@ class _WelcomePageState extends State<WelcomePage> {
   InkWell buttonDashboard() {
     return InkWell(
         onTap: () {
+          // Navigator.of(context).pushAndRemoveUntil(
+          //     MaterialPageRoute(
+          //         builder: (BuildContext context) => WelcomePage()),
+          //     (Route<dynamic> route) => false);
+        },
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 12),
+                child: Material(
+                  shape: RoundedRectangleBorder(),
+                  clipBehavior: Clip.hardEdge,
+                  child: new Image.asset(AppAssets.icDashboard,
+                      height: 18.0, width: 18.0, color: AppColors.greyColor),
+                ),
+              ),
+              Padding(padding: EdgeInsets.only(left: 10)),
+              Text("Dashboard", style: AppStyles.drawerMenuTextStyle),
+            ]));
+  }
+
+  InkWell buttonDirectory() {
+    return InkWell(
+        onTap: () {
           Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
-                  builder: (BuildContext context) => WelcomePage()),
+                  builder: (BuildContext context) => EmployeeList()),
               (Route<dynamic> route) => false);
         },
         child: Row(
@@ -320,39 +493,13 @@ class _WelcomePageState extends State<WelcomePage> {
                 child: Material(
                   shape: RoundedRectangleBorder(),
                   clipBehavior: Clip.hardEdge,
-                  child: Image.asset(AppAssets.icDashboard,
+                  child: Image.asset(AppAssets.icDirectory,
                       height: 18.0, width: 18.0, color: AppColors.greyColor),
                 ),
               ),
               Padding(padding: EdgeInsets.only(left: 10)),
-              Text("Dashboard", style: AppStyles.drawerMenuTextStyle),
+              Text("Directory", style: AppStyles.drawerMenuTextStyle),
             ]));
-  }
-
-  InkWell buttonDirectory() {
-    return InkWell(
-        // onTap: () {
-        //   Navigator.of(context).pushAndRemoveUntil(
-        //       MaterialPageRoute(
-        //           builder: (BuildContext context) => EmployeeList()),
-        //       (Route<dynamic> route) => false);
-        // },
-        child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(top: 12, bottom: 12),
-            child: Material(
-              shape: RoundedRectangleBorder(),
-              clipBehavior: Clip.hardEdge,
-              child: Image.asset(AppAssets.icDirectory,
-                  height: 18.0, width: 18.0, color: AppColors.greyColor),
-            ),
-          ),
-          Padding(padding: EdgeInsets.only(left: 10)),
-          Text("Directory", style: AppStyles.drawerMenuTextStyle),
-        ]));
   }
 
   Item? selectedUser;
@@ -456,7 +603,7 @@ Widget tabDashboard(String title, String img, final Function onPressed) {
                 height: 15,
               ),
               Center(
-                  child: SizedBox(
+                  child: Container(
                       height: 36,
                       width: 36,
                       child: Image.asset(

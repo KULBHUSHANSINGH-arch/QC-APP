@@ -6,12 +6,12 @@ class AllMemberListModel {
 
   AllMemberListModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
-    data = json['data'] != null ? Data.fromJson(json['data']) : null;
+    data = json['data'] != null ? new Data.fromJson(json['data']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['success'] = success;
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['success'] = this.success;
     if (this.data != null) {
       data['data'] = this.data?.toJson();
     }
@@ -28,15 +28,15 @@ class Data {
     if (json['person'] != null) {
       person = <Person>[];
       json['person'].forEach((v) {
-        person!.add(Person.fromJson(v));
+        person!.add(new Person.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    if (person != null) {
-      data['person'] = person!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (this.person != null) {
+      data['person'] = this.person!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -110,27 +110,27 @@ class Person {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['businessname'] = businessname;
-    data['businesscategory'] = businesscategory;
-    data['personid'] = personid;
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['businessname'] = this.businessname;
+    data['businesscategory'] = this.businesscategory;
+    data['personid'] = this.personid;
     // data['title'] = this.title;
-    data['firstname'] = firstname;
-    data['middlename'] = middlename;
-    data['lastname'] = lastname;
-    data['suffix'] = suffix;
-    data['profilepicture'] = profilepicture;
-    data['dob'] = dob;
-    data['status'] = status;
-    data['addrline1'] = addrline1;
-    data['addrline2'] = addrline2;
-    data['city'] = city;
-    data['state'] = state;
-    data['country'] = country;
-    data['area'] = area;
-    data['postalcode'] = postalcode;
-    data['countrycode'] = countrycode;
-    data['phonenum'] = phonenum;
+    data['firstname'] = this.firstname;
+    data['middlename'] = this.middlename;
+    data['lastname'] = this.lastname;
+    data['suffix'] = this.suffix;
+    data['profilepicture'] = this.profilepicture;
+    data['dob'] = this.dob;
+    data['status'] = this.status;
+    data['addrline1'] = this.addrline1;
+    data['addrline2'] = this.addrline2;
+    data['city'] = this.city;
+    data['state'] = this.state;
+    data['country'] = this.country;
+    data['area'] = this.area;
+    data['postalcode'] = this.postalcode;
+    data['countrycode'] = this.countrycode;
+    data['phonenum'] = this.phonenum;
     return data;
   }
 }

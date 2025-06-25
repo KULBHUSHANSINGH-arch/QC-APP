@@ -1,15 +1,19 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:newqcm/CommonDrawer.dart';
-import 'package:newqcm/Ipqc.dart';
-import 'package:newqcm/Welcomepage.dart';
-import 'package:newqcm/components/app_button_widget.dart';
-import 'package:newqcm/components/app_loader.dart';
-import 'package:newqcm/ipqcTestList.dart';
+// import 'package:QCM/CommonDrawer.dart';
+// import 'package:QCM/Ipqc.dart';
+// import 'package:QCM/Welcomepage.dart';
+// import 'package:QCM/components/app_button_widget.dart';
+// import 'package:QCM/components/app_loader.dart';
+// import 'package:QCM/ipqcTestList.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:qcmapp/Ipqc.dart';
+import 'package:qcmapp/components/app_button_widget.dart';
+import 'package:qcmapp/components/app_loader.dart';
+import 'package:qcmapp/ipqcTestList.dart';
 import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
@@ -124,8 +128,10 @@ class _BomCardState extends State<BomCard> {
   bool menu = false, user = false, face = false, home = false;
   bool _isLoading = false;
   String selectedShift = "Day Shift";
+  List locationList = [];
   String setPage = '',
       pic = '',
+      WorkLocation = '',
       site = '',
       designation = '',
       status = '',
@@ -164,8 +170,49 @@ class _BomCardState extends State<BomCard> {
       designation = prefs.getString('designation')!;
       department = prefs.getString('department')!;
       token = prefs.getString('token')!;
+      WorkLocation = prefs.getString('workLocation')!;
     });
     _get();
+    getLocationData();
+  }
+
+  getLocationData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    site = prefs.getString('site')!;
+    print("site URL: $site");
+
+    if (site == null) {
+      print('Site URL is null or empty.');
+      return;
+    }
+
+    final url = (site! + 'Employee/WorkLocationList');
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        var designationBody = jsonDecode(response.body);
+        print("Location List: $designationBody");
+
+        if (mounted) {
+          setState(() {
+            locationList = designationBody['data'];
+          });
+          print("locationList: $locationList");
+        }
+      } else {
+        print("Failed to load data: ${response.statusCode}");
+      }
+    } catch (e) {
+      print('Error fetching location data: $e');
+    }
   }
 
   Future _get() async {
@@ -204,6 +251,7 @@ class _BomCardState extends State<BomCard> {
                   .format(DateTime.parse(resBody['data']['Date'].toString()))
               : '';
           selectedShift = resBody['data']['Shift'] ?? '';
+          WorkLocation = resBody['data']['WorkLocation'] ?? '';
           LineController.text = resBody['data']['Line'] ?? '';
           poController.text = resBody['data']['PONo'] ?? '';
           // Solar Cell
@@ -318,7 +366,7 @@ class _BomCardState extends State<BomCard> {
     }
   }
 
-  Future setApprovalStatus() async {
+  Future setApprovalStatus(approvalStatus, id) async {
     setState(() {
       _isLoading = true;
     });
@@ -329,7 +377,7 @@ class _BomCardState extends State<BomCard> {
       "token": token,
       "CurrentUser": personid,
       "Status": approvalStatus,
-      "JobCardDetailId": widget.id ?? ""
+      "JobCardDetailId": id ?? ""
     };
 
     var response = await http.post(
@@ -382,6 +430,18 @@ class _BomCardState extends State<BomCard> {
   }
 
   Future findData() async {
+    if (sendStatus == "Pending") {
+      print("Inside");
+      print(sendStatus);
+      print(widget.id);
+      setApprovalStatus(
+          "Pending",
+          BomId != '' && BomId != null
+              ? BomId
+              : widget.id != '' && widget.id != null
+                  ? widget.id
+                  : '');
+    }
     final prefs = await SharedPreferences.getInstance();
     site = prefs.getString('site')!;
     var Bom = [
@@ -398,6 +458,7 @@ class _BomCardState extends State<BomCard> {
         "RevNo": "1.0 & 12.08.2023",
         "PONo": poController.text,
         "Date": bomCardDate,
+        "WorkLocation": WorkLocation,
         "Shift": selectedShift,
         "Line": LineController.text,
       },
@@ -741,6 +802,58 @@ class _BomCardState extends State<BomCard> {
                               const SizedBox(
                                 height: 15,
                               ),
+                              if (designation == "Super Admin")
+                                Text(
+                                  "Work Location",
+                                  style: AppStyles.textfieldCaptionTextStyle,
+                                ),
+                              if (designation == "Super Admin")
+                                const SizedBox(
+                                  height: 4,
+                                ),
+                              if (designation == "Super Admin")
+                                DropdownButtonFormField<String>(
+                                  decoration: AppStyles.textFieldInputDecoration
+                                      .copyWith(
+                                    hintText: "Select Work Location",
+                                    counterText: '',
+                                    contentPadding: EdgeInsets.all(10),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          20), // Rounded borders
+                                    ),
+                                  ),
+                                  items: locationList
+                                      .map((label) => DropdownMenuItem(
+                                            child: Text(
+                                              label['workLocationName'],
+                                              style:
+                                                  AppStyles.textInputTextStyle,
+                                            ),
+                                            value: label['workLocationId']
+                                                .toString(),
+                                          ))
+                                      .toList(),
+                                  onChanged: designation != "Super Admin"
+                                      ? null
+                                      : (val) {
+                                          setState(() {
+                                            WorkLocation = val!;
+                                          });
+                                        },
+                                  value:
+                                      WorkLocation != '' ? WorkLocation : null,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please Select Work Location';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              if (designation == "Super Admin")
+                                const SizedBox(
+                                  height: 15,
+                                ),
                               Text(
                                 "Date",
                                 style: AppStyles.textfieldCaptionTextStyle,
@@ -3155,7 +3268,8 @@ class _BomCardState extends State<BomCard> {
                                             fontSize: 16),
                                         onTap: () {
                                           AppHelper.hideKeyboard(context);
-                                          setApprovalStatus();
+                                          setApprovalStatus(
+                                              "Approve", widget.id);
                                         },
                                         label: "Approve",
                                         organization: '',

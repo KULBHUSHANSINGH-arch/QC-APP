@@ -1,16 +1,20 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:newqcm/CommonDrawer.dart';
-import 'package:newqcm/Ipqc.dart';
-import 'package:newqcm/Welcomepage.dart';
-import 'package:newqcm/components/app_button_widget.dart';
-import 'package:newqcm/components/app_loader.dart';
-import 'package:newqcm/ipqcTestList.dart';
+// import 'package:QCM/CommonDrawer.dart';
+// import 'package:QCM/Ipqc.dart';
+// import 'package:QCM/Welcomepage.dart';
+// import 'package:QCM/components/app_button_widget.dart';
+// import 'package:QCM/components/app_loader.dart';
+// import 'package:QCM/ipqcTestList.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:qcmapp/Ipqc.dart';
+import 'package:qcmapp/components/app_button_widget.dart';
+import 'package:qcmapp/components/app_loader.dart';
+import 'package:qcmapp/ipqcTestList.dart';
 import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -84,9 +88,11 @@ class _JobcardState extends State<Jobcard> {
   bool? isCycleTimeTrue = false;
   String selectedShift = "Day Shift";
   List<int>? referencePdfFileBytes;
+  List locationList = [];
   bool? isBacksheetCuttingTrue = false;
   late String sendStatus;
   String status = '',
+      WorkLocation = '',
       jobCarId = '',
       approvalStatus = "Approved",
       designation = '',
@@ -115,10 +121,54 @@ class _JobcardState extends State<Jobcard> {
       personid = prefs.getString('personid')!;
       site = prefs.getString('site')!;
       designation = prefs.getString('designation')!;
+      print("designatiomn");
+      print(designation);
       department = prefs.getString('department')!;
       token = prefs.getString('token')!;
+      WorkLocation = prefs.getString('workLocation')!;
     });
+
     _get();
+    getLocationData();
+  }
+
+  getLocationData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    site = prefs.getString('site')!;
+    print("site URL: $site");
+
+    if (site == null) {
+      print('Site URL is null or empty.');
+      return;
+    }
+
+    final url = (site! + 'Employee/WorkLocationList');
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        var designationBody = jsonDecode(response.body);
+        print("Location List: $designationBody");
+
+        if (mounted) {
+          setState(() {
+            locationList = designationBody['data'];
+          });
+          print("locationList: $locationList");
+        }
+      } else {
+        print("Failed to load data: ${response.statusCode}");
+      }
+    } catch (e) {
+      print('Error fetching location data: $e');
+    }
   }
 
   Future _get() async {
@@ -157,6 +207,7 @@ class _JobcardState extends State<Jobcard> {
               ? DateFormat("EEE MMM dd, yyyy").format(
                   DateTime.parse(resBody['response']['Date'].toString()))
               : '';
+          WorkLocation = resBody['response']['WorkLocation'] ?? '';
           selectedShift = resBody['response']['Shift'] ?? '';
           moduleTypeController.text = resBody['response']['ModuleType'] ?? '';
 
@@ -271,7 +322,7 @@ class _JobcardState extends State<Jobcard> {
     }
   }
 
-  Future setApprovalStatus() async {
+  Future setApprovalStatus(approvalStatus, id) async {
     setState(() {
       _isLoading = true;
     });
@@ -283,7 +334,7 @@ class _JobcardState extends State<Jobcard> {
       "token": token,
       "CurrentUser": personid,
       "ApprovalStatus": approvalStatus,
-      "JobCardDetailId": widget.id ?? ""
+      "JobCardDetailId": id ?? ""
     };
 
     var response = await http.post(
@@ -336,6 +387,18 @@ class _JobcardState extends State<Jobcard> {
   }
 
   Future createData() async {
+    if (sendStatus == "Pending") {
+      print("Inside");
+      print(sendStatus);
+      print(widget.id);
+      setApprovalStatus(
+          "Pending",
+          jobCarId != '' && jobCarId != null
+              ? jobCarId
+              : widget.id != '' && widget.id != null
+                  ? widget.id
+                  : '');
+    }
     var data = [
       {
         "JobCardDetails": {
@@ -346,6 +409,7 @@ class _JobcardState extends State<Jobcard> {
                   ? widget.id
                   : '',
           "date": jobCardDate,
+          "WorkLocation": WorkLocation,
           "Shift": selectedShift,
           "moduleType": moduleTypeController.text,
           "matrixSize": matrixSizeController.text,
@@ -695,6 +759,58 @@ class _JobcardState extends State<Jobcard> {
                               const SizedBox(
                                 height: 15,
                               ),
+                              if (designation == "Super Admin")
+                                Text(
+                                  "Work Location",
+                                  style: AppStyles.textfieldCaptionTextStyle,
+                                ),
+                              if (designation == "Super Admin")
+                                const SizedBox(
+                                  height: 4,
+                                ),
+                              if (designation == "Super Admin")
+                                DropdownButtonFormField<String>(
+                                  decoration: AppStyles.textFieldInputDecoration
+                                      .copyWith(
+                                    hintText: "Select Work Location",
+                                    counterText: '',
+                                    contentPadding: EdgeInsets.all(10),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          20), // Rounded borders
+                                    ),
+                                  ),
+                                  items: locationList
+                                      .map((label) => DropdownMenuItem(
+                                            child: Text(
+                                              label['workLocationName'],
+                                              style:
+                                                  AppStyles.textInputTextStyle,
+                                            ),
+                                            value: label['workLocationId']
+                                                .toString(),
+                                          ))
+                                      .toList(),
+                                  onChanged: designation != "Super Admin"
+                                      ? null
+                                      : (val) {
+                                          setState(() {
+                                            WorkLocation = val!;
+                                          });
+                                        },
+                                  value:
+                                      WorkLocation != '' ? WorkLocation : null,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please Select Work Location';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              if (designation == "Super Admin")
+                                const SizedBox(
+                                  height: 15,
+                                ),
                               Text(
                                 "Date",
                                 style: AppStyles.textfieldCaptionTextStyle,
@@ -2350,7 +2466,8 @@ class _JobcardState extends State<Jobcard> {
                                             fontSize: 16),
                                         onTap: () {
                                           AppHelper.hideKeyboard(context);
-                                          setApprovalStatus();
+                                          setApprovalStatus(
+                                              "Approve", widget.id);
                                         },
                                         label: "Approve",
                                         organization: '',

@@ -1,0 +1,2 @@
+C:/Users/pc/Desktop/New Flutter App/qcapp/android/app/.cxx/Debug/3x65585x/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/pc/Desktop/New Flutter App/qcapp/android/app/.cxx/Debug/3x65585x/arm64-v8a/CMakeFiles/rebuild_cache.dir

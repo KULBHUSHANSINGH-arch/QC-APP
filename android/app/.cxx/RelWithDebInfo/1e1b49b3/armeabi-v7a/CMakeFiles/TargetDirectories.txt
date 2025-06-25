@@ -1,0 +1,2 @@
+E:/Updated Mobile App/qcm-updated-app/android/app/.cxx/RelWithDebInfo/1e1b49b3/armeabi-v7a/CMakeFiles/edit_cache.dir
+E:/Updated Mobile App/qcm-updated-app/android/app/.cxx/RelWithDebInfo/1e1b49b3/armeabi-v7a/CMakeFiles/rebuild_cache.dir

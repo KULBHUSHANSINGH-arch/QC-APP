@@ -1,29 +1,51 @@
-// import 'package:newqcm/AluminiumFrame.dart';
-// import 'package:newqcm/Backsheet.dart';
-import 'package:newqcm/CommonDrawer.dart';
-// import 'package:newqcm/Encapsulant.dart';
-// import 'package:newqcm/Flux.dart';
-import 'package:newqcm/Fqc.dart';
-import 'package:newqcm/Ipqc.dart';
-// import 'package:newqcm/JunctionBox.dart';
-// import 'package:newqcm/Ribbon.dart';
-// import 'package:newqcm/Sealant.dart';
-// import 'package:newqcm/SolarCell.dart';
-// import 'package:newqcm/SolarGlass.dart';
-import 'package:newqcm/Welcomepage.dart';
-import 'package:newqcm/components/appbar.dart';
-import 'package:newqcm/constant/app_color.dart';
-import 'package:newqcm/constant/app_fonts.dart';
-import 'package:newqcm/constant/app_styles.dart';
-import 'package:newqcm/directory.dart';
+// import 'package:QCM/AluminiumFrame.dart';
+// import 'package:QCM/Backsheet.dart';
+// import 'package:QCM/CommonDrawer.dart';
+// import 'package:QCM/Encapsulant.dart';
+// import 'package:QCM/Flux.dart';
+// import 'package:QCM/Fqc.dart';
+// import 'package:QCM/Ipqc.dart';
+// import 'package:QCM/JunctionBox.dart';
+// import 'package:QCM/Ribbon.dart';
+// import 'package:QCM/Sealant.dart';
+// import 'package:QCM/SolarCell.dart';
+// import 'package:QCM/SolarGlass.dart';
+// import 'package:QCM/Welcomepage.dart';
+// import 'package:QCM/components/appbar.dart';
+// import 'package:QCM/constant/app_color.dart';
+// import 'package:QCM/constant/app_fonts.dart';
+// import 'package:QCM/constant/app_styles.dart';
+// import 'package:QCM/directory.dart';
+// import 'package:QCM/testingEquipList.dart';
+// import 'package:QCM/testingequipment.dart';
 import 'package:flutter/material.dart';
+import 'package:qcmapp/AluminiumFrame.dart';
+import 'package:qcmapp/Backsheet.dart';
+import 'package:qcmapp/CommonDrawer.dart';
+import 'package:qcmapp/Encapsulant.dart';
+import 'package:qcmapp/Flux.dart';
+import 'package:qcmapp/Fqc.dart';
+import 'package:qcmapp/Ipqc.dart';
+import 'package:qcmapp/JunctionBox.dart';
+import 'package:qcmapp/Ribbon.dart';
+import 'package:qcmapp/Sealant.dart';
+import 'package:qcmapp/SolarCell.dart';
+import 'package:qcmapp/SolarGlass.dart';
+import 'package:qcmapp/Welcomepage.dart';
+import 'package:qcmapp/components/appbar.dart';
+import 'package:qcmapp/constant/app_color.dart';
+import 'package:qcmapp/constant/app_fonts.dart';
+import 'package:qcmapp/constant/app_styles.dart';
+import 'package:qcmapp/directory.dart';
+import 'package:qcmapp/testingEquipList.dart';
+import 'package:qcmapp/testingequipment.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // import '../BoxCricket.dart';
 import '../constant/app_assets.dart';
 import '../main.dart';
 
 class IqcpPage extends StatefulWidget {
-  const IqcpPage({super.key});
+  IqcpPage({Key? key}) : super(key: key);
 
   @override
   _WelcomePageState createState() => _WelcomePageState();
@@ -130,24 +152,24 @@ class _WelcomePageState extends State<IqcpPage> {
                 const SizedBox(
                   width: 10,
                 ),
-                // Expanded(
-                //     child: tabDashboard('Solar Cell', AppAssets.solarcell, () {
-                //   Navigator.of(context).pushAndRemoveUntil(
-                //       MaterialPageRoute(
-                //           builder: (BuildContext context) => SolarCell(id: "")),
-                //       (Route<dynamic> route) => false);
-                // })),
+                Expanded(
+                    child: tabDashboard('Solar Cell', AppAssets.solarcell, () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (BuildContext context) => SolarCell(id: "")),
+                      (Route<dynamic> route) => false);
+                })),
                 const SizedBox(
                   width: 10,
                 ),
-                // Expanded(
-                //     child: tabDashboard('Solar Glass', AppAssets.planet, () {
-                //   Navigator.of(context).pushAndRemoveUntil(
-                //       MaterialPageRoute(
-                //           builder: (BuildContext context) =>
-                //               SolarGlass(id: "")),
-                //       (Route<dynamic> route) => false);
-                // })),
+                Expanded(
+                    child: tabDashboard('Solar Glass', AppAssets.planet, () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              SolarGlass(id: "")),
+                      (Route<dynamic> route) => false);
+                })),
                 const SizedBox(
                   width: 10,
                 ),
@@ -165,101 +187,136 @@ class _WelcomePageState extends State<IqcpPage> {
                 const SizedBox(
                   width: 10,
                 ),
+                Expanded(
+                    child: tabDashboard('Encapsulant/EVA', AppAssets.eva, () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              Encapsulant(id: "")),
+                      (Route<dynamic> route) => false);
+                })),
+                const SizedBox(
+                  width: 10,
+                ),
+                Expanded(
+                    child: tabDashboard('Ribbon', AppAssets.icDirectory, () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (BuildContext context) => Ribbon(id: "")),
+                      (Route<dynamic> route) => false);
+                })),
+                const SizedBox(
+                  width: 10,
+                ),
+              ],
+            ),
+
+            const SizedBox(
+              height: 10,
+            ),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(
+                  width: 10,
+                ),
+                Expanded(
+                    child: tabDashboard(
+                        'Junction Box', AppAssets.imgAttendanceReport, () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (BuildContext context) => JunctionBox()),
+                      (Route<dynamic> route) => false);
+                })),
+                const SizedBox(
+                  width: 10,
+                ),
+                Expanded(
+                    child: tabDashboard(
+                        'Aluminium Frame', AppAssets.imgSalaryReport, () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (BuildContext context) => AluminiumFrame()),
+                      (Route<dynamic> route) => false);
+                })),
+                const SizedBox(
+                  width: 10,
+                ),
+              ],
+            ),
+
+            const SizedBox(
+              height: 10,
+            ),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(
+                  width: 10,
+                ),
+                Expanded(
+                    child: tabDashboard('Flux', AppAssets.flux, () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (BuildContext context) => Flux()),
+                      (Route<dynamic> route) => false);
+                })),
+                const SizedBox(
+                  width: 10,
+                ),
+                Expanded(
+                    child: tabDashboard(
+                        'Backsheet', AppAssets.imgAttendanceList, () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (BuildContext context) => Backsheet()),
+                      (Route<dynamic> route) => false);
+                })),
+                const SizedBox(
+                  width: 10,
+                ),
+              ],
+            ),
+
+            const SizedBox(
+              height: 10,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(
+                  width: 10,
+                ),
+                Expanded(
+                    child:
+                        tabDashboard('Sealant/Poating', AppAssets.Poating, () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (BuildContext context) => Sealant()),
+                      (Route<dynamic> route) => false);
+                })),
+                const SizedBox(
+                  width: 10,
+                ),
                 // Expanded(
-                //     child: tabDashboard('Encapsulant/EVA', AppAssets.eva, () {
+                //     child: tabDashboard(
+                //         'Testing Equipment', AppAssets.testingeqipment, () {
                 //   Navigator.of(context).pushAndRemoveUntil(
                 //       MaterialPageRoute(
                 //           builder: (BuildContext context) =>
-                //               Encapsulant(id: "")),
+                //               TestingEquipment()),
                 //       (Route<dynamic> route) => false);
                 // })),
-                const SizedBox(
-                  width: 10,
-                ),
-                // Expanded(
-                //     child: tabDashboard('Ribbon', AppAssets.icDirectory, () {
-                //   Navigator.of(context).pushAndRemoveUntil(
-                //       MaterialPageRoute(
-                //           builder: (BuildContext context) => Ribbon(id: "")),
-                //       (Route<dynamic> route) => false);
-                // })),
-                const SizedBox(
-                  width: 10,
-                ),
+                // const SizedBox(
+                //   width: 10,
+                // ),
               ],
             ),
-
-            const SizedBox(
-              height: 10,
-            ),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(
-                  width: 10,
-                ),
-                // Expanded(
-                //     child: tabDashboard(
-                //         'Junction Box', AppAssets.imgAttendanceReport, () {
-                //   Navigator.of(context).pushAndRemoveUntil(
-                //       MaterialPageRoute(
-                //           builder: (BuildContext context) => JunctionBox()),
-                //       (Route<dynamic> route) => false);
-                // })),
-                const SizedBox(
-                  width: 10,
-                ),
-                // Expanded(
-                //     child: tabDashboard(
-                //         'Aluminium Frame', AppAssets.imgSalaryReport, () {
-                //   Navigator.of(context).pushAndRemoveUntil(
-                //       MaterialPageRoute(
-                //           builder: (BuildContext context) => AluminiumFrame()),
-                //       (Route<dynamic> route) => false);
-                // })),
-                const SizedBox(
-                  width: 10,
-                ),
-              ],
-            ),
-
-            const SizedBox(
-              height: 10,
-            ),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(
-                  width: 10,
-                ),
-                // Expanded(
-                //     child: tabDashboard('Flux', AppAssets.flux, () {
-                //   Navigator.of(context).pushAndRemoveUntil(
-                //       MaterialPageRoute(
-                //           builder: (BuildContext context) => Flux()),
-                //       (Route<dynamic> route) => false);
-                // })),
-                const SizedBox(
-                  width: 10,
-                ),
-                // Expanded(
-                //     child: tabDashboard(
-                //         'Backsheet', AppAssets.imgAttendanceList, () {
-                //   Navigator.of(context).pushAndRemoveUntil(
-                //       MaterialPageRoute(
-                //           builder: (BuildContext context) => Backsheet()),
-                //       (Route<dynamic> route) => false);
-                // })),
-                const SizedBox(
-                  width: 10,
-                ),
-              ],
-            ),
-
             const SizedBox(
               height: 10,
             ),
@@ -267,23 +324,34 @@ class _WelcomePageState extends State<IqcpPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(
+                SizedBox(
                   width: 10,
                 ),
-                // Expanded(
-                //     child:
-                //         tabDashboard('Sealant/Poating', AppAssets.Poating, () {
-                //   Navigator.of(context).pushAndRemoveUntil(
-                //       MaterialPageRoute(
-                //           builder: (BuildContext context) => Sealant()),
-                //       (Route<dynamic> route) => false);
-                // })),
-                const SizedBox(
+                Expanded(
+                    child: tabDashboard(
+                        'Testing Equipment', AppAssets.testingeqipment, () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              TestingEquipment()),
+                      (Route<dynamic> route) => false);
+                })),
+                SizedBox(
                   width: 10,
                 ),
+                Expanded(
+                    child: tabDashboard(
+                        'Testing Equipment List', AppAssets.testingeqipment,
+                        () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              testingEquipList()),
+                      (Route<dynamic> route) => false);
+                })),
               ],
             ),
-            const SizedBox(
+            SizedBox(
               height: 10,
             ),
           ],
@@ -380,7 +448,7 @@ class _WelcomePageState extends State<IqcpPage> {
                 child: Material(
                   shape: RoundedRectangleBorder(),
                   clipBehavior: Clip.hardEdge,
-                  child: Image.asset(AppAssets.icDashboard,
+                  child: new Image.asset(AppAssets.icDashboard,
                       height: 18.0, width: 18.0, color: AppColors.greyColor),
                 ),
               ),
@@ -522,7 +590,7 @@ Widget tabDashboard(String title, String img, final Function onPressed) {
                 height: 15,
               ),
               Center(
-                  child: SizedBox(
+                  child: Container(
                       height: 36,
                       width: 36,
                       child: Image.asset(

@@ -1,30 +1,44 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
-import 'package:newqcm/CommonDrawer.dart';
-import 'package:newqcm/Fqc.dart';
-import 'package:newqcm/Fqc_list_model.dart';
-import 'package:newqcm/Ipqc.dart';
-import 'package:newqcm/Iqcp.dart';
-import 'package:newqcm/QualityPage.dart';
-import 'package:newqcm/Welcomepage.dart';
-import 'package:newqcm/addeditemployee.dart';
-import 'package:newqcm/components/app_loader.dart';
-import 'package:newqcm/components/appbar.dart';
-import 'package:newqcm/constant/app_assets.dart';
-import 'package:newqcm/constant/app_color.dart';
-import 'package:newqcm/constant/app_fonts.dart';
-import 'package:newqcm/constant/app_strings.dart';
-import 'package:newqcm/constant/app_styles.dart';
-// import 'package:newqcm/user_list_model.dart';
-// import 'package:cached_network_image/cached_network_image.dart';
+// import 'package:QCM/CommonDrawer.dart';
+// import 'package:QCM/Fqc.dart';
+// import 'package:QCM/Ipqc.dart';
+// import 'package:QCM/Iqcp.dart';
+// import 'package:QCM/QualityPage.dart';
+// import 'package:QCM/Welcomepage.dart';
+// import 'package:QCM/addeditemployee.dart';
+// import 'package:QCM/components/app_loader.dart';
+// import 'package:QCM/components/appbar.dart';
+// import 'package:QCM/constant/app_assets.dart';
+// import 'package:QCM/constant/app_color.dart';
+// import 'package:QCM/constant/app_fonts.dart';
+// import 'package:QCM/constant/app_strings.dart';
+// import 'package:QCM/constant/app_styles.dart';
+// import 'package:QCM/user_list_model.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:qcmapp/CommonDrawer.dart';
+import 'package:qcmapp/Fqc.dart';
+import 'package:qcmapp/Ipqc.dart';
+import 'package:qcmapp/Iqcp.dart';
+import 'package:qcmapp/QualityPage.dart';
+import 'package:qcmapp/Welcomepage.dart';
+import 'package:qcmapp/addeditemployee.dart';
+import 'package:qcmapp/components/app_loader.dart';
+import 'package:qcmapp/components/appbar.dart';
+import 'package:qcmapp/constant/app_assets.dart';
+import 'package:qcmapp/constant/app_color.dart';
+import 'package:qcmapp/constant/app_fonts.dart';
+import 'package:qcmapp/constant/app_strings.dart';
+import 'package:qcmapp/constant/app_styles.dart';
+import 'package:qcmapp/user_list_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 
 class EmployeeList extends StatefulWidget {
-  const EmployeeList({super.key});
+  EmployeeList();
 
   @override
   _DirectoryState createState() => _DirectoryState();
@@ -34,11 +48,11 @@ class _DirectoryState extends State<EmployeeList> {
   final GlobalKey<TooltipState> tooltipkey = GlobalKey<TooltipState>();
   TextEditingController SearchController = TextEditingController();
   // TextEditingController _paymentModeController = new TextEditingController();
-  TextEditingController ExpiryDateController = TextEditingController();
-  TextEditingController PaymentDateController = TextEditingController();
+  TextEditingController ExpiryDateController = new TextEditingController();
+  TextEditingController PaymentDateController = new TextEditingController();
 
-  TextEditingController NoteController = TextEditingController();
-  final GlobalKey<FormState> _renewalFormkey = GlobalKey<FormState>();
+  TextEditingController NoteController = new TextEditingController();
+  GlobalKey<FormState> _renewalFormkey = GlobalKey<FormState>();
 
   bool _isLoading = false, IN = false, OUT = false;
   bool menu = false, user = true, face = false, home = false;
@@ -66,12 +80,12 @@ class _DirectoryState extends State<EmployeeList> {
       Expirydate,
       Paymentdate;
   // RoleModel? paymentModeData;
-  TextEditingController AmountController = TextEditingController();
+  TextEditingController AmountController = new TextEditingController();
   bool status = false, isAllowedEdit = false;
   var decodedResult;
   var rmbDropDown;
   Future? userdata;
-  // late UserModel aUserModel;
+  late UserModel aUserModel;
   List dropdownList = [];
 
   @override
@@ -93,35 +107,35 @@ class _DirectoryState extends State<EmployeeList> {
       department = prefs.getString('department');
     });
 
-    // userdata = getData();
+    userdata = getData();
   }
 
-  // Future<List<UserData>?> getData() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   site = prefs.getString('site');
-  //   setState(() {
-  //     _isLoading = true;
-  //   });
+  Future<List<UserData>?> getData() async {
+    final prefs = await SharedPreferences.getInstance();
+    site = prefs.getString('site');
+    setState(() {
+      _isLoading = true;
+    });
 
-  //   final url = (site! + 'Employee/GetList');
+    final url = (site! + 'Employee/GetList');
 
-  //   http.get(
-  //     Uri.parse(url),
-  //     // body: jsonEncode(<String, String>{"personid": personid!}),
-  //     headers: {
-  //       'Content-Type': 'application/json; charset=UTF-8',
-  //     },
-  //   ).then((response) {
-  //     if (mounted) {
-  //       setState(() {
-  //         _isLoading = false;
-  //         decodedResult = jsonDecode(response.body);
-  //       });
-  //     }
-  //   });
+    http.get(
+      Uri.parse(url),
+      // body: jsonEncode(<String, String>{"personid": personid!}),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    ).then((response) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          decodedResult = jsonDecode(response.body);
+        });
+      }
+    });
 
-  //   return null;
-  // }
+    return null;
+  }
 
   void setMemberStatus(status, id) async {
     setState(() {
@@ -130,7 +144,7 @@ class _DirectoryState extends State<EmployeeList> {
 
     final prefs = await SharedPreferences.getInstance();
     site = prefs.getString('site');
-    final url = '${site!}Employee/DeleteEmployee';
+    final url = (site!) + 'Employee/DeleteEmployee';
     var response = await http.post(
       Uri.parse(url),
       body: jsonEncode(<String, String>{"PersonId": id, "Status": status}),
@@ -149,7 +163,7 @@ class _DirectoryState extends State<EmployeeList> {
           gravity: Toast.center,
           backgroundColor: AppColors.primaryColor);
 
-      // getData();
+      getData();
 
       return;
     } else {
@@ -306,7 +320,7 @@ class _DirectoryState extends State<EmployeeList> {
                           return Future<void>.delayed(
                               const Duration(seconds: 3));
                         },
-                        child: SizedBox(
+                        child: Container(
                           // margin: EdgeInsets.only(bottom: 80),
                           width: MediaQuery.of(context).size.width,
                           child: Center(child: _userData()),
@@ -328,29 +342,28 @@ class _DirectoryState extends State<EmployeeList> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       InkWell(
-                          // onTap: () {
-                          //   Navigator.of(context).pushReplacement(
-                          //       MaterialPageRoute(
-                          //           builder: (BuildContext context) =>
-                          //               (department == 'IQCP' &&
-                          //                       designation != 'Super Admin')
-                          //                   ? IqcpPage()
-                          //                   : (department == 'IPQC' &&
-                          //                           designation !=
-                          //                               'Super Admin')
-                          //                       ? IpqcPage()
-                          //                       : (department == 'FQC' &&
-                          //                               designation !=
-                          //                                   'Super Admin')
-                          //                           ? FqcPage()
-                          //                           : (department ==
-                          //                                       'QUALITY' &&
-                          //                                   designation !=
-                          //                                       'Super Admin')
-                          //                               ? QualityPage()
-                          //                               : WelcomePage()));
-                          // },
-
+                          onTap: () {
+                            Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                    builder: (BuildContext context) =>
+                                        (department == 'IQCP' &&
+                                                designation != 'Super Admin')
+                                            ? IqcpPage()
+                                            : (department == 'IPQC' &&
+                                                    designation !=
+                                                        'Super Admin')
+                                                ? IpqcPage()
+                                                : (department == 'FQC' &&
+                                                        designation !=
+                                                            'Super Admin')
+                                                    ? FqcPage()
+                                                    : (department ==
+                                                                'QUALITY' &&
+                                                            designation !=
+                                                                'Super Admin')
+                                                        ? QualityPage()
+                                                        : WelcomePage()));
+                          },
                           child: Image.asset(
                               home
                                   ? AppAssets.icHomeSelected
@@ -411,10 +424,10 @@ class _DirectoryState extends State<EmployeeList> {
       padding: const EdgeInsets.only(bottom: 70),
       child: FloatingActionButton(
         onPressed: () {
-          // Navigator.of(context).pushAndRemoveUntil(
-          //     MaterialPageRoute(
-          //         builder: (BuildContext context) => AddEditProfile()),
-          //     (Route<dynamic> route) => false);
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                  builder: (BuildContext context) => AddEditProfile()),
+              (Route<dynamic> route) => false);
         },
         child: ClipOval(
           child: Image.asset(
@@ -433,11 +446,11 @@ class _DirectoryState extends State<EmployeeList> {
       future: userdata,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          // aUserModel = UserModel.fromJson(decodedResult);
+          aUserModel = UserModel.fromJson(decodedResult);
 
-          // List<UserData> data = aUserModel.data!;
+          List<UserData> data = aUserModel.data!;
 
-          // return _user(aUserModel);
+          return _user(aUserModel);
         } else if (snapshot.hasError) {
           return const AppLoader();
         }
@@ -464,7 +477,7 @@ class _DirectoryState extends State<EmployeeList> {
                     _hasBeenPressed1 = 'Active';
                     _hasBeenPressed2 = '';
                   });
-                  // userdata = getData();
+                  userdata = getData();
                 },
                 child: Text('Active',
                     style: TextStyle(
@@ -490,7 +503,7 @@ class _DirectoryState extends State<EmployeeList> {
                 setState(() {
                   _hasBeenPressed1 = 'Inactive';
                 });
-                // userdata = getData();
+                userdata = getData();
               },
               child: Text(
                 'Inactive',
@@ -522,7 +535,7 @@ class _DirectoryState extends State<EmployeeList> {
                   setState(() {
                     _hasBeenPressed1 = 'Pending';
                   });
-                  // userdata = getData();
+                  userdata = getData();
                 },
                 child: Text(
                   'Pending',
@@ -554,7 +567,7 @@ class _DirectoryState extends State<EmployeeList> {
                   setState(() {
                     _hasBeenPressed1 = 'Decline';
                   });
-                  // userdata = getData();
+                  userdata = getData();
                 },
                 child: Text(
                   'Declined',
@@ -572,8 +585,7 @@ class _DirectoryState extends State<EmployeeList> {
         ));
   }
 
-  // Column _user(UserModel data) {
-  Column _user(data) {
+  Column _user(UserModel data) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       const Padding(padding: EdgeInsets.only(top: 15, left: 10, right: 10)),
       const Padding(
@@ -791,52 +803,52 @@ class _DirectoryState extends State<EmployeeList> {
                                             topRight: Radius.circular(25.0),
                                             bottomLeft: Radius.circular(25.0),
                                           )),
-                                      // child: CachedNetworkImage(
-                                      //   width: 430,
-                                      //   height: 400,
-                                      //   imageUrl: (profilepic),
-                                      //   errorWidget: (context, url, error) {
-                                      //     return ClipRRect(
-                                      //         borderRadius:
-                                      //             BorderRadius.circular(10),
-                                      //         child: Image.asset(
-                                      //           AppAssets.profilePlaceholder,
-                                      //           fit: BoxFit.cover,
-                                      //           width: double.infinity,
-                                      //         ));
-                                      //   },
-                                      //   // placeholder: 'cupertinoActivityIndicator',
-                                      //   fit: BoxFit.fill,
-                                      // ),
+                                      child: CachedNetworkImage(
+                                        width: 430,
+                                        height: 400,
+                                        imageUrl: (profilepic),
+                                        errorWidget: (context, url, error) {
+                                          return ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              child: Image.asset(
+                                                AppAssets.profilePlaceholder,
+                                                fit: BoxFit.cover,
+                                                width: double.infinity,
+                                              ));
+                                        },
+                                        // placeholder: 'cupertinoActivityIndicator',
+                                        fit: BoxFit.fill,
+                                      ),
                                     ),
                                   ),
                                 );
                               },
                             );
                           },
-                          // child: CachedNetworkImage(
-                          //   imageUrl: profilepic,
-                          //   height: 60,
-                          //   width: 60,
-                          //   placeholder: (context, url) {
-                          //     return ClipOval(
-                          //       child: Image.asset(
-                          //         AppAssets.profilePlaceholder,
-                          //         height: 60,
-                          //         width: 60,
-                          //       ),
-                          //     );
-                          //   },
-                          //   errorWidget: (context, url, error) {
-                          //     return ClipOval(
-                          //       child: Image.asset(
-                          //         AppAssets.profilePlaceholder,
-                          //         height: 60,
-                          //         width: 60,
-                          //       ),
-                          //     );
-                          //   },
-                          // ),
+                          child: CachedNetworkImage(
+                            imageUrl: profilepic,
+                            height: 60,
+                            width: 60,
+                            placeholder: (context, url) {
+                              return ClipOval(
+                                child: Image.asset(
+                                  AppAssets.profilePlaceholder,
+                                  height: 60,
+                                  width: 60,
+                                ),
+                              );
+                            },
+                            errorWidget: (context, url, error) {
+                              return ClipOval(
+                                child: Image.asset(
+                                  AppAssets.profilePlaceholder,
+                                  height: 60,
+                                  width: 60,
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),
@@ -917,13 +929,13 @@ class _DirectoryState extends State<EmployeeList> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       InkWell(
-                        // onTap: () {
-                        //   Navigator.of(context).pushAndRemoveUntil(
-                        //       MaterialPageRoute(
-                        //           builder: (BuildContext context) =>
-                        //               AddEditProfile(id: id)),
-                        //       (Route<dynamic> route) => false);
-                        // },
+                        onTap: () {
+                          Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      AddEditProfile(id: id)),
+                              (Route<dynamic> route) => false);
+                        },
                         child: Image.asset(
                           AppAssets.icMemberEdit,
                           height: 40,

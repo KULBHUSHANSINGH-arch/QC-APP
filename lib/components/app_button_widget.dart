@@ -1,7 +1,8 @@
 // ignore_for_file: prefer_const_constructors_in_immutables, use_key_in_widget_constructors
 
-import 'package:newqcm/constant/app_color.dart';
+// import 'package:QCM/constant/app_color.dart';
 import 'package:flutter/material.dart';
+import 'package:qcmapp/constant/app_color.dart';
 
 class AppButton extends StatelessWidget {
   final String label;

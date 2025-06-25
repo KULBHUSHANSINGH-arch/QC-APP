@@ -1,31 +1,53 @@
-import 'package:newqcm/CommonDrawer.dart';
-import 'package:newqcm/Fqc.dart';
-import 'package:newqcm/Iqcp.dart';
-import 'package:newqcm/Jobcard.dart';
-
-import 'package:newqcm/Welcomepage.dart';
-import 'package:newqcm/bomcard.dart';
-import 'package:newqcm/components/appbar.dart';
-import 'package:newqcm/constant/app_color.dart';
-import 'package:newqcm/constant/app_fonts.dart';
-import 'package:newqcm/constant/app_styles.dart';
-import 'package:newqcm/directory.dart';
-
+// import 'package:QCM/CapaReport.dart';
+// import 'package:QCM/CommonDrawer.dart';
+// import 'package:QCM/Fqc.dart';
+// import 'package:QCM/IPQCCheckSheetList.dart';
+// import 'package:QCM/IPQCTestCheck.dart';
+// import 'package:QCM/Iqcp.dart';
+// import 'package:QCM/Jobcard.dart';
+// import 'package:QCM/Welcomepage.dart';
+// import 'package:QCM/components/appbar.dart';
+// import 'package:QCM/constant/app_color.dart';
+// import 'package:QCM/constant/app_fonts.dart';
+// import 'package:QCM/constant/app_styles.dart';
+// import 'package:QCM/directory.dart';
+// import 'package:QCM/framing.dart';
+// import 'package:QCM/ipqcSelant.dart';
+// import 'package:QCM/machineCard.dart';
+// import 'package:QCM/postLambaliyali.dart';
+// import 'package:QCM/postlam.dart';
+// import 'package:QCM/bomcard.dart';
+// import 'package:QCM/preLamBaliyali.dart';
+// import 'package:QCM/prelam.dart';
+// import 'package:QCM/testingCard.dart';
+// import 'package:QCM/testingEquipList.dart';
+// import 'package:QCM/testingequipment.dart';
 import 'package:flutter/material.dart';
-// import 'package:newqcm/ipqcSelant.dart';
-import 'package:newqcm/framing.dart';
-import 'package:newqcm/ipqcSelant.dart';
-import 'package:newqcm/machineCard.dart';
-import 'package:newqcm/postlamBaliyali.dart';
-import 'package:newqcm/prelam.dart';
-import 'package:newqcm/testingCard.dart';
-import 'package:newqcm/testingEquipList.dart';
-import 'package:newqcm/testingequipment.dart';
+import 'package:qcmapp/CommonDrawer.dart';
+import 'package:qcmapp/Fqc.dart';
+import 'package:qcmapp/Iqcp.dart';
+import 'package:qcmapp/Jobcard.dart';
+import 'package:qcmapp/Welcomepage.dart';
+import 'package:qcmapp/bomcard.dart';
+import 'package:qcmapp/components/appbar.dart';
+import 'package:qcmapp/constant/app_color.dart';
+import 'package:qcmapp/constant/app_fonts.dart';
+import 'package:qcmapp/constant/app_styles.dart';
+import 'package:qcmapp/directory.dart';
+import 'package:qcmapp/framing.dart';
+import 'package:qcmapp/ipqcSelant.dart';
+import 'package:qcmapp/machineCard.dart';
+import 'package:qcmapp/postLambaliyali.dart';
+import 'package:qcmapp/postlam.dart';
+import 'package:qcmapp/preLamBaliyali.dart';
+import 'package:qcmapp/prelam.dart';
+import 'package:qcmapp/testingCard.dart';
+import 'package:qcmapp/testingEquipList.dart';
+import 'package:qcmapp/testingequipment.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constant/app_assets.dart';
 
 class IpqcPage extends StatefulWidget {
-  // const IpqcPage({super.key});
   IpqcPage({Key? key}) : super(key: key);
 
   @override
@@ -37,6 +59,7 @@ class _WelcomePageState extends State<IpqcPage> {
       designation,
       department,
       lastname,
+      WorkLocationName,
       personid,
       pic,
       VersionNo,
@@ -68,6 +91,7 @@ class _WelcomePageState extends State<IpqcPage> {
       businessname = prefs.getString('businessname');
       organizationName = prefs.getString('organizationName');
       organizationtype = prefs.getString('organizationtype');
+      WorkLocationName = prefs.getString('WorkLocationName');
       site = prefs.getString('site');
       ImagePath = prefs.getString('imagePath');
       vCard = prefs.getString('Vcard');
@@ -160,38 +184,39 @@ class _WelcomePageState extends State<IpqcPage> {
               height: 10,
             ),
             //1st row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 10,
-                ),
-                Expanded(
-                    child: tabDashboard(
-                        'Pre-Lam IPQC Check Sheet', AppAssets.prelam, () {
-                  Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                          builder: (BuildContext context) => PreCard()),
-                      (Route<dynamic> route) => false);
-                })),
-                SizedBox(
-                  width: 10,
-                ),
-                Expanded(
-                    child: tabDashboard(
-                        'Post-Lam Baliyali IPQC Check Sheet', AppAssets.postlam,
-                        () {
-                  Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                          builder: (BuildContext context) => PostlamBaliyali()),
-                      (Route<dynamic> route) => false);
-                })),
-                SizedBox(
-                  width: 10,
-                ),
-              ],
-            ),
+            if (designation == "Super Admin" ||
+                WorkLocationName != "Baliyali Unit 1")
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                      child: tabDashboard(
+                          'Pre-Lam IPQC Haridwar', AppAssets.prelam, () {
+                    Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                            builder: (BuildContext context) => PreCard()),
+                        (Route<dynamic> route) => false);
+                  })),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                      child: tabDashboard(
+                          'Post-Lam IPQC Haridwar', AppAssets.postlam, () {
+                    Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                            builder: (BuildContext context) => Postlam()),
+                        (Route<dynamic> route) => false);
+                  })),
+                  SizedBox(
+                    width: 10,
+                  ),
+                ],
+              ),
 
             SizedBox(
               height: 10,
@@ -290,14 +315,51 @@ class _WelcomePageState extends State<IpqcPage> {
                   Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(
                           builder: (BuildContext context) =>
-                              // testingEquipList()),
                               testingEquipList()),
                       (Route<dynamic> route) => false);
                 })),
-                SizedBox(
-                  width: 10,
-                ),
               ],
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            if (designation == "Super Admin" ||
+                WorkLocationName == "Baliyali Unit 1")
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                      child: tabDashboard(
+                          'Pre-Lam IPQC  Baliyali', AppAssets.prelam, () {
+                    Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                            builder: (BuildContext context) => PreCardB()),
+                        (Route<dynamic> route) => false);
+                  })),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                      child: tabDashboard(
+                          'Postlam IPQC Baliyali', AppAssets.postlam, () {
+                    Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                PostlamBaliyali()),
+                        (Route<dynamic> route) => false);
+                  })),
+                  SizedBox(
+                    width: 10,
+                  ),
+                ],
+              ),
+
+            SizedBox(
+              height: 10,
             ),
           ],
         ),
@@ -315,19 +377,19 @@ class _WelcomePageState extends State<IpqcPage> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             InkWell(
-                // onTap: () {
-                //   Navigator.of(context).pushReplacement(MaterialPageRoute(
-                //       builder: (BuildContext context) =>
-                //           (department == 'IQCP' && designation != 'Super Admin')
-                //               ? IqcpPage()
-                //               : (department == 'IPQC' &&
-                //                       designation != 'Super Admin')
-                //                   ? IpqcPage()
-                //                   : (department == 'FQC' &&
-                //                           designation != 'Super Admin')
-                //                       ? FqcPage()
-                //                       : WelcomePage()));
-                // },
+                onTap: () {
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          (department == 'IQCP' && designation != 'Super Admin')
+                              ? IqcpPage()
+                              : (department == 'IPQC' &&
+                                      designation != 'Super Admin')
+                                  ? IpqcPage()
+                                  : (department == 'FQC' &&
+                                          designation != 'Super Admin')
+                                      ? FqcPage()
+                                      : WelcomePage()));
+                },
                 child: Image.asset(
                     home
                         ? AppAssets.icHomeSelected
@@ -337,12 +399,12 @@ class _WelcomePageState extends State<IpqcPage> {
               width: 8,
             ),
             InkWell(
-                // onTap: () {
-                //   if (designation == 'Super Admin') {
-                //     Navigator.of(context).pushReplacement(MaterialPageRoute(
-                //         builder: (BuildContext context) => EmployeeList()));
-                //   }
-                // },
+                onTap: () {
+                  if (designation == 'Super Admin') {
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (BuildContext context) => EmployeeList()));
+                  }
+                },
                 child: Image.asset(
                     user ? AppAssets.imgSelectedPerson : AppAssets.imgPerson,
                     height: 25)),
@@ -393,7 +455,7 @@ class _WelcomePageState extends State<IpqcPage> {
                 child: Material(
                   shape: RoundedRectangleBorder(),
                   clipBehavior: Clip.hardEdge,
-                  child: Image.asset(AppAssets.icDashboard,
+                  child: new Image.asset(AppAssets.icDashboard,
                       height: 18.0, width: 18.0, color: AppColors.greyColor),
                 ),
               ),
@@ -404,28 +466,28 @@ class _WelcomePageState extends State<IpqcPage> {
 
   InkWell buttonDirectory() {
     return InkWell(
-        // onTap: () {
-        //   Navigator.of(context).pushAndRemoveUntil(
-        //       MaterialPageRoute(
-        //           builder: (BuildContext context) => EmployeeList()),
-        //       (Route<dynamic> route) => false);
-        // },
+        onTap: () {
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                  builder: (BuildContext context) => EmployeeList()),
+              (Route<dynamic> route) => false);
+        },
         child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(top: 12, bottom: 12),
-            child: Material(
-              shape: RoundedRectangleBorder(),
-              clipBehavior: Clip.hardEdge,
-              child: Image.asset(AppAssets.icDirectory,
-                  height: 18.0, width: 18.0, color: AppColors.greyColor),
-            ),
-          ),
-          Padding(padding: EdgeInsets.only(left: 10)),
-          Text("Directory", style: AppStyles.drawerMenuTextStyle),
-        ]));
+              Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 12),
+                child: Material(
+                  shape: RoundedRectangleBorder(),
+                  clipBehavior: Clip.hardEdge,
+                  child: Image.asset(AppAssets.icDirectory,
+                      height: 18.0, width: 18.0, color: AppColors.greyColor),
+                ),
+              ),
+              Padding(padding: EdgeInsets.only(left: 10)),
+              Text("Directory", style: AppStyles.drawerMenuTextStyle),
+            ]));
   }
 
   Item? selectedUser;

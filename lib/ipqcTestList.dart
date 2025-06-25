@@ -1,35 +1,61 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:newqcm/CommonDrawer.dart';
-import 'package:newqcm/Ipqc.dart';
-import 'package:newqcm/Iqcp.dart';
-import 'package:newqcm/Jobcard.dart';
-// import 'package:newqcm/SolarCell.dart';
-import 'package:newqcm/Welcomepage.dart';
-import 'package:newqcm/addeditemployee.dart';
-import 'package:newqcm/bomcard.dart';
-import 'package:newqcm/busBar.dart';
-import 'package:newqcm/components/app_loader.dart';
-import 'package:newqcm/components/appbar.dart';
-import 'package:newqcm/constant/app_assets.dart';
-import 'package:newqcm/constant/app_color.dart';
-import 'package:newqcm/constant/app_fonts.dart';
-import 'package:newqcm/constant/app_styles.dart';
-import 'package:newqcm/framing.dart';
-import 'package:newqcm/ipqcSelant.dart';
-import 'package:newqcm/ipqc_list_model.dart';
-import 'package:newqcm/laminator1.dart';
-import 'package:newqcm/laminator2.dart';
-import 'package:newqcm/postlamBaliyali.dart';
-// import 'package:newqcm/postlam.dart';
-import 'package:newqcm/prelam.dart';
-import 'package:newqcm/solderingPeel.dart';
-import 'package:newqcm/stringer1.dart';
-import 'package:newqcm/stringer2.dart';
-import 'package:newqcm/stringer3.dart';
+// import 'package:QCM/CommonDrawer.dart';
+// import 'package:QCM/Ipqc.dart';
+// import 'package:QCM/Iqcp.dart';
+// import 'package:QCM/Jobcard.dart';
+// import 'package:QCM/SolarCell.dart';
+// import 'package:QCM/Welcomepage.dart';
+// import 'package:QCM/addeditemployee.dart';
+// import 'package:QCM/bomcard.dart';
+// import 'package:QCM/busBar.dart';
+// import 'package:QCM/components/app_loader.dart';
+// import 'package:QCM/components/appbar.dart';
+// import 'package:QCM/constant/app_assets.dart';
+// import 'package:QCM/constant/app_color.dart';
+// import 'package:QCM/constant/app_fonts.dart';
+// import 'package:QCM/constant/app_styles.dart';
+// import 'package:QCM/framing.dart';
+// import 'package:QCM/ipqcSelant.dart';
+// import 'package:QCM/ipqc_list_model.dart';
+// import 'package:QCM/laminator1.dart';
+// import 'package:QCM/laminator2.dart';
+// import 'package:QCM/postLambaliyali.dart';
+// import 'package:QCM/postlam.dart';
+// import 'package:QCM/preLamBaliyali.dart';
+// import 'package:QCM/prelam.dart';
+// import 'package:QCM/solderingPeel.dart';
+// import 'package:QCM/stringer1.dart';
+// import 'package:QCM/stringer2.dart';
+// import 'package:QCM/stringer3.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:flutter/material.dart';
+import 'package:qcmapp/CommonDrawer.dart';
+import 'package:qcmapp/Ipqc.dart';
+import 'package:qcmapp/Jobcard.dart';
+import 'package:qcmapp/Welcomepage.dart';
+import 'package:qcmapp/bomcard.dart';
+import 'package:qcmapp/busBar.dart';
+import 'package:qcmapp/components/app_loader.dart';
+import 'package:qcmapp/components/appbar.dart';
+import 'package:qcmapp/constant/app_assets.dart';
+import 'package:qcmapp/constant/app_color.dart';
+import 'package:qcmapp/constant/app_fonts.dart';
+import 'package:qcmapp/constant/app_styles.dart';
+import 'package:qcmapp/framing.dart';
+import 'package:qcmapp/ipqcSelant.dart';
+import 'package:qcmapp/ipqc_list_model.dart';
+import 'package:qcmapp/laminator1.dart';
+import 'package:qcmapp/laminator2.dart';
+import 'package:qcmapp/postLambaliyali.dart';
+import 'package:qcmapp/postlam.dart';
+import 'package:qcmapp/preLamBaliyali.dart';
+import 'package:qcmapp/prelam.dart';
+import 'package:qcmapp/solderingPeel.dart';
+import 'package:qcmapp/stringer1.dart';
+import 'package:qcmapp/stringer2.dart';
+import 'package:qcmapp/stringer3.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
@@ -54,7 +80,9 @@ class _IpqcTestListState extends State<IpqcTestList> {
       token,
       vCard,
       firstname,
+      WorkLocation,
       lastname,
+      locationController,
       pic,
       logo,
       site,
@@ -73,6 +101,7 @@ class _IpqcTestListState extends State<IpqcTestList> {
   Future? userdata;
   late UserModel aUserModel;
   List dropdownList = [];
+  List locationList = [];
 
   @override
   void initState() {
@@ -92,15 +121,55 @@ class _IpqcTestListState extends State<IpqcTestList> {
       designation = prefs.getString('designation');
       department = prefs.getString('department');
       token = prefs.getString('token');
+      WorkLocation = prefs.getString('workLocation')!;
     });
     print(designation);
     print(department);
     print("Hi...?");
 
-    userdata = getData();
+    userdata = getData(WorkLocation);
+    getLocationData();
   }
 
-  Future<List<UserData>?> getData() async {
+  getLocationData() async {
+    final prefs = await SharedPreferences.getInstance();
+    site = prefs.getString('site');
+    print("site URL: $site");
+
+    if (site == null) {
+      print('Site URL is null or empty.');
+      return;
+    }
+
+    final url = (site! + 'Employee/WorkLocationList');
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        var designationBody = jsonDecode(response.body);
+        print("Location List: $designationBody");
+
+        if (mounted) {
+          setState(() {
+            locationList = designationBody['data'];
+          });
+          print("locationList: $locationList");
+        }
+      } else {
+        print("Failed to load data: ${response.statusCode}");
+      }
+    } catch (e) {
+      print('Error fetching location data: $e');
+    }
+  }
+
+  Future<List<UserData>?> getData(WorkLocation) async {
     print("heloooooooooooooooooooooooooooooooooo");
     print(token);
     final prefs = await SharedPreferences.getInstance();
@@ -115,8 +184,13 @@ class _IpqcTestListState extends State<IpqcTestList> {
 
     http.post(
       Uri.parse(url),
-      body: jsonEncode(
-          <String, String>{"token": token!, "Status": _hasBeenPressed1!}),
+      body: jsonEncode(<String, String>{
+        "token": token!,
+        "Status": _hasBeenPressed1!,
+        "Designation": designation!,
+        "PersonID": personid!,
+        "WorkLocation": WorkLocation!
+      }),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -155,7 +229,7 @@ class _IpqcTestListState extends State<IpqcTestList> {
           gravity: Toast.center,
           backgroundColor: AppColors.primaryColor);
 
-      getData();
+      getData(WorkLocation);
 
       return;
     } else {
@@ -185,7 +259,7 @@ class _IpqcTestListState extends State<IpqcTestList> {
           gravity: Toast.center,
           backgroundColor: AppColors.primaryColor);
       setState(() {
-        getData();
+        getData(WorkLocation);
       });
       return;
     } else {
@@ -371,7 +445,7 @@ class _IpqcTestListState extends State<IpqcTestList> {
                   setState(() {
                     _hasBeenPressed1 = 'Inprogress';
                   });
-                  userdata = getData();
+                  userdata = getData(WorkLocation);
                 },
                 child: Text('Inprogress',
                     style: TextStyle(
@@ -397,7 +471,7 @@ class _IpqcTestListState extends State<IpqcTestList> {
                 setState(() {
                   _hasBeenPressed1 = 'Approved';
                 });
-                userdata = getData();
+                userdata = getData(WorkLocation);
               },
               child: Text(
                 'Approved',
@@ -425,7 +499,7 @@ class _IpqcTestListState extends State<IpqcTestList> {
                 setState(() {
                   _hasBeenPressed1 = 'Pending';
                 });
-                userdata = getData();
+                userdata = getData(WorkLocation);
               },
               child: Text(
                 'Pending',
@@ -453,7 +527,7 @@ class _IpqcTestListState extends State<IpqcTestList> {
                 setState(() {
                   _hasBeenPressed1 = 'Rejected';
                 });
-                userdata = getData();
+                userdata = getData(WorkLocation);
               },
               child: Text(
                 'Rejected',
@@ -489,29 +563,89 @@ class _IpqcTestListState extends State<IpqcTestList> {
           )),
       const Padding(padding: EdgeInsets.only(top: 15, left: 10, right: 10)),
       Row(children: <Widget>[
-        Container(
-          child: Expanded(
-              child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
+        Expanded(
+          flex: 3, // Larger flex value to increase size
+          child: Padding(
+            padding: const EdgeInsets.only(left: 10),
             child: TextField(
               controller: SearchController,
               textAlignVertical: TextAlignVertical.center,
               keyboardType: TextInputType.text,
               textInputAction: TextInputAction.next,
               decoration: AppStyles.textFieldInputDecoration.copyWith(
-                  hintText: "Search IPQC",
-                  prefixIcon: const Icon(
-                    Icons.search,
-                    size: 25,
-                    color: AppColors.lightBlackColor,
-                  )),
+                hintText: "Search IPQC List ",
+                prefixIcon: const Icon(
+                  Icons.search,
+                  size: 25,
+                  color: AppColors.lightBlackColor,
+                ),
+              ),
               style: AppStyles.textInputTextStyle,
               onChanged: (value) {
                 setState(() {});
               },
             ),
-          )),
+          ),
         ),
+
+        // Space between TextField and Dropdown
+        // SizedBox(width: 10),
+
+        // Unit DropdownButtonFormField inside Expanded with smaller flex
+        if (designation == "Super Admin")
+          Expanded(
+            flex: 3, // Smaller flex value to decrease size
+            child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: DropdownButtonFormField<String>(
+                  decoration: AppStyles.textFieldInputDecoration.copyWith(
+                    hintText: "ALL",
+                    counterText: '',
+                    contentPadding: EdgeInsets.all(10),
+                    border: OutlineInputBorder(
+                      borderRadius:
+                          BorderRadius.circular(20), // Rounded borders
+                    ),
+                  ),
+                  // items: locationList
+                  //     .map((label) => DropdownMenuItem(
+                  //           child: Text(
+                  //             label['workLocationName'],
+                  //             style: AppStyles.textInputTextStyle,
+                  //           ),
+                  //           value: label['workLocationId'].toString(),
+                  //         ))
+                  //     .toList(),
+                  items: [
+                    // Static "Select All" Item
+                    DropdownMenuItem<String>(
+                      value: '', // Unique static value
+                      child: Text(
+                        'All',
+                        style: AppStyles.textInputTextStyle,
+                      ),
+                    ),
+                    // Dynamically populated items from locationList
+                    ...locationList.map((label) => DropdownMenuItem<String>(
+                          value: label['workLocationId'].toString(),
+                          child: Text(
+                            label['workLocationName'],
+                            style: AppStyles.textInputTextStyle,
+                          ),
+                        )),
+                  ],
+                  onChanged: designation != "Super Admin"
+                      ? null
+                      : (val) {
+                          setState(() {
+                            WorkLocation = val!;
+                          });
+                          getData(WorkLocation);
+                          // getData(DesigantionId, locationController);
+                        },
+                  value: WorkLocation != '' ? WorkLocation : null,
+                )),
+          ),
       ]),
       Padding(
           padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
@@ -555,6 +689,7 @@ class _IpqcTestListState extends State<IpqcTestList> {
                             data.data![index].employeeID ?? '',
                             data.data![index].type ?? '',
                             data.data![index].excelURL ?? '',
+                            data.data![index].PdfURL ?? '',
                             data.data![index].referencePdf ?? '',
                             data.data![index].date ?? '',
                             data.data![index].shift ?? ''));
@@ -576,60 +711,7 @@ class _IpqcTestListState extends State<IpqcTestList> {
                             data.data![index].employeeID ?? '',
                             data.data![index].type ?? '',
                             data.data![index].excelURL ?? '',
-                            data.data![index].referencePdf ?? '',
-                            data.data![index].date ?? '',
-                            data.data![index].shift ?? ''));
-                  } else if (data.data![index].location!
-                      .toLowerCase()
-                      .contains((SearchController.text).toLowerCase())) {
-                    return Container(
-                        margin: const EdgeInsets.only(top: 10.0),
-                        child: _tile(
-                            data.data![index].jobCardDetailID ?? '',
-                            data.data![index].materialName ?? '',
-                            data.data![index].profileImg ?? '',
-                            data.data![index].name ?? '',
-                            data.data![index].location ?? '',
-                            data.data![index].moduleNo ?? '',
-                            data.data![index].employeeID ?? '',
-                            data.data![index].type ?? '',
-                            data.data![index].excelURL ?? '',
-                            data.data![index].referencePdf ?? '',
-                            data.data![index].date ?? '',
-                            data.data![index].shift ?? ''));
-                  } else if (data.data![index].moduleNo!
-                      .toLowerCase()
-                      .contains((SearchController.text).toLowerCase())) {
-                    return Container(
-                        margin: const EdgeInsets.only(top: 10.0),
-                        child: _tile(
-                            data.data![index].jobCardDetailID ?? '',
-                            data.data![index].materialName ?? '',
-                            data.data![index].profileImg ?? '',
-                            data.data![index].name ?? '',
-                            data.data![index].location ?? '',
-                            data.data![index].moduleNo ?? '',
-                            data.data![index].employeeID ?? '',
-                            data.data![index].type ?? '',
-                            data.data![index].excelURL ?? '',
-                            data.data![index].referencePdf ?? '',
-                            data.data![index].date ?? '',
-                            data.data![index].shift ?? ''));
-                  } else if ((data.data![index].employeeID!)
-                      .toLowerCase()
-                      .contains((SearchController.text).toLowerCase())) {
-                    return Container(
-                        margin: const EdgeInsets.only(top: 10.0),
-                        child: _tile(
-                            data.data![index].jobCardDetailID ?? '',
-                            data.data![index].materialName ?? '',
-                            data.data![index].profileImg ?? '',
-                            data.data![index].name ?? '',
-                            data.data![index].location ?? '',
-                            data.data![index].moduleNo ?? '',
-                            data.data![index].employeeID ?? '',
-                            data.data![index].type ?? '',
-                            data.data![index].excelURL ?? '',
+                            data.data![index].PdfURL ?? '',
                             data.data![index].referencePdf ?? '',
                             data.data![index].date ?? '',
                             data.data![index].shift ?? ''));
@@ -648,6 +730,7 @@ class _IpqcTestListState extends State<IpqcTestList> {
                             data.data![index].employeeID ?? '',
                             data.data![index].type ?? '',
                             data.data![index].excelURL ?? '',
+                            data.data![index].PdfURL ?? '',
                             data.data![index].referencePdf ?? '',
                             data.data![index].date ?? '',
                             data.data![index].shift ?? ''));
@@ -672,6 +755,7 @@ class _IpqcTestListState extends State<IpqcTestList> {
       String employeeid,
       String type,
       String excelUrl,
+      String PdfURL,
       String referencePdf,
       String shift,
       String date) {
@@ -715,44 +799,50 @@ class _IpqcTestListState extends State<IpqcTestList> {
                                       ? AppAssets.bom
                                       : type == "PreLam"
                                           ? AppAssets.prelam
-                                          : type == "Framing"
-                                              ? AppAssets.framemeasurement
-                                              : type == "Sealent"
-                                                  ? AppAssets.sealantmeasurement
-                                                  : type == "Busbar"
-                                                      ? AppAssets.busbar
-                                                      : type == "Soldering"
-                                                          ? AppAssets.peel
-                                                          : type == "Laminator1"
+                                          : type == "PostLam"
+                                              ? AppAssets.postlam
+                                              : type == "PreLam Baliyali"
+                                                  ? AppAssets.prelam
+                                                  : type == "PostLam Baliyali"
+                                                      ? AppAssets.postlam
+                                                      : type == "Framing"
+                                                          ? AppAssets
+                                                              .framemeasurement
+                                                          : type == "Sealent"
                                                               ? AppAssets
-                                                                  .Laminator1
-                                                              : type ==
-                                                                      "Laminator2"
+                                                                  .sealantmeasurement
+                                                              : type == "Busbar"
                                                                   ? AppAssets
-                                                                      .Laminator2
+                                                                      .busbar
                                                                   : type ==
-                                                                          "Stringer1"
+                                                                          "Soldering"
                                                                       ? AppAssets
-                                                                          .Stringer1
+                                                                          .peel
                                                                       : type ==
-                                                                              "Stringer2"
+                                                                              "Laminator1"
                                                                           ? AppAssets
-                                                                              .Stringer2
-                                                                          : type == "Stringer3"
-                                                                              ? AppAssets.Stringer3
+                                                                              .Laminator1
+                                                                          : type == "Laminator2"
+                                                                              ? AppAssets.Laminator2
+                                                                              : type == "Stringer1"
+                                                                                  ? AppAssets.Stringer1
+                                                                                  : type == "Stringer2"
+                                                                                      ? AppAssets.Stringer2
+                                                                                      : type == "Stringer3"
+                                                                                          ? AppAssets.Stringer3
 
-                                                                              //     : type ==
-                                                                              //             "Aluminium Frame"
-                                                                              //         ? AppAssets.imgSalaryReport
-                                                                              //         : type == "Flux"
-                                                                              //             ? AppAssets.flux
-                                                                              //             : type ==
-                                                                              //                     "Backsheet"
-                                                                              //                 ? AppAssets
-                                                                              //                     .imgAttendanceList
-                                                                              : type == "PostLam"
-                                                                                  ? AppAssets.postlam
-                                                                                  : AppAssets.jobcard,
+                                                                                          //     : type ==
+                                                                                          //             "Aluminium Frame"
+                                                                                          //         ? AppAssets.imgSalaryReport
+                                                                                          //         : type == "Flux"
+                                                                                          //             ? AppAssets.flux
+                                                                                          //             : type ==
+                                                                                          //                     "Backsheet"
+                                                                                          //                 ? AppAssets
+                                                                                          //                     .imgAttendanceList
+                                                                                          : type == "PostLam"
+                                                                                              ? AppAssets.postlam
+                                                                                              : AppAssets.jobcard,
                               height: 60,
                               width: 60,
                             ),
@@ -969,8 +1059,7 @@ class _IpqcTestListState extends State<IpqcTestList> {
                         const SizedBox(
                           height: 2,
                         ),
-                        if ((_hasBeenPressed1 == 'Approved' ||
-                                _hasBeenPressed1 == 'Rejected') &&
+                        if ((_hasBeenPressed1 != 'Inprogress') &&
                             excelUrl != "" &&
                             excelUrl != null)
                           Row(children: <Widget>[
@@ -1012,6 +1101,49 @@ class _IpqcTestListState extends State<IpqcTestList> {
                               width: 20,
                             ),
                           ]),
+
+                        if ((_hasBeenPressed1 != 'Inprogress') &&
+                            PdfURL != "" &&
+                            PdfURL != null)
+                          Row(children: <Widget>[
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: Color.fromARGB(
+                                    255, 172, 69, 141), // Background color
+                                borderRadius: BorderRadius.circular(
+                                    10), // Optional: Add border radius for rounded corners
+                              ),
+                              child: const Text(
+                                "Picture Report :",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11,
+                                  color: Color.fromARGB(255, 255, 255,
+                                      255), // Optional: Set text color
+                                ),
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 5,
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                UrlLauncher.launch(PdfURL);
+                              },
+                              child: ClipRRect(
+                                child: Image.asset(
+                                  AppAssets.icPdf,
+                                  width: 30,
+                                  height: 30,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 20,
+                            ),
+                          ]),
                       ],
                     )),
                   ),
@@ -1031,35 +1163,42 @@ class _IpqcTestListState extends State<IpqcTestList> {
                                         ? Jobcard(id: id)
                                         : type == "BOM Verification"
                                             ? BomCard(id: id)
-                                            : type == "PreLam"
-                                                ? PreCard(id: id)
-                                                : type == "PostlamBaliyali"
-                                                    ? PostlamBaliyali(id: id)
-                                                    : type == "Framing"
-                                                        ? framing(id: id)
-                                                        : type == "Sealent"
-                                                            ? ipqcSelant(id: id)
-                                                            : type == "Busbar"
-                                                                ? busbar(id: id)
+                                            : type == "PreLam Baliyali"
+                                                ? PreCardB(id: id)
+                                                : type == "PreLam"
+                                                    ? PreCard(id: id)
+                                                    : type == "PostLam"
+                                                        ? Postlam(id: id)
+                                                        : type ==
+                                                                "PostLam Baliyali"
+                                                            ? PostlamBaliyali(
+                                                                id: id)
+                                                            : type == "Framing"
+                                                                ? framing(
+                                                                    id: id)
                                                                 : type ==
-                                                                        "Soldering"
-                                                                    ? solderingPeel(
+                                                                        "Sealent"
+                                                                    ? ipqcSelant(
                                                                         id: id)
                                                                     : type ==
-                                                                            "Laminator1"
-                                                                        ? laminator1(
+                                                                            "Busbar"
+                                                                        ? busbar(
                                                                             id:
                                                                                 id)
                                                                         : type ==
-                                                                                "Laminator2"
-                                                                            ? laminator2(id: id)
-                                                                            : type == "Stringer1"
-                                                                                ? stringer1(id: id)
-                                                                                : type == "Stringer2"
-                                                                                    ? stringer2(id: id)
-                                                                                    : type == "Stringer3"
-                                                                                        ? stringer3(id: id)
-                                                                                        : BomCard(id: id)),
+                                                                                "Soldering"
+                                                                            ? solderingPeel(id: id)
+                                                                            : type == "Laminator1"
+                                                                                ? laminator1(id: id)
+                                                                                : type == "Laminator2"
+                                                                                    ? laminator2(id: id)
+                                                                                    : type == "Stringer1"
+                                                                                        ? stringer1(id: id)
+                                                                                        : type == "Stringer2"
+                                                                                            ? stringer2(id: id)
+                                                                                            : type == "Stringer3"
+                                                                                                ? stringer3(id: id)
+                                                                                                : BomCard(id: id)),
                                 (Route<dynamic> route) => false);
                           },
                           child: Image.asset(
@@ -1088,33 +1227,40 @@ class _IpqcTestListState extends State<IpqcTestList> {
                                             ? BomCard(id: id)
                                             : type == "PreLam"
                                                 ? PreCard(id: id)
-                                                : type == "PostLam"
-                                                    ? PostlamBaliyali(id: id)
-                                                    : type == "Framing"
-                                                        ? framing(id: id)
-                                                        : type == "Sealent"
-                                                            ? ipqcSelant(id: id)
-                                                            : type == "Busbar"
-                                                                ? busbar(id: id)
+                                                : type == "PreLam Baliyali"
+                                                    ? PreCardB(id: id)
+                                                    : type == "PostLam"
+                                                        ? Postlam(id: id)
+                                                        : type ==
+                                                                "PostLam Baliyali"
+                                                            ? PostlamBaliyali(
+                                                                id: id)
+                                                            : type == "Framing"
+                                                                ? framing(
+                                                                    id: id)
                                                                 : type ==
-                                                                        "Soldering"
-                                                                    ? solderingPeel(
+                                                                        "Sealent"
+                                                                    ? ipqcSelant(
                                                                         id: id)
                                                                     : type ==
-                                                                            "Laminator1"
-                                                                        ? laminator1(
+                                                                            "Busbar"
+                                                                        ? busbar(
                                                                             id:
                                                                                 id)
                                                                         : type ==
-                                                                                "Laminator2"
-                                                                            ? laminator2(id: id)
-                                                                            : type == "Stringer1"
-                                                                                ? stringer1(id: id)
-                                                                                : type == "Stringer2"
-                                                                                    ? stringer2(id: id)
-                                                                                    : type == "Stringer3"
-                                                                                        ? stringer3(id: id)
-                                                                                        : BomCard(id: id)),
+                                                                                "Soldering"
+                                                                            ? solderingPeel(id: id)
+                                                                            : type == "Laminator1"
+                                                                                ? laminator1(id: id)
+                                                                                : type == "Laminator2"
+                                                                                    ? laminator2(id: id)
+                                                                                    : type == "Stringer1"
+                                                                                        ? stringer1(id: id)
+                                                                                        : type == "Stringer2"
+                                                                                            ? stringer2(id: id)
+                                                                                            : type == "Stringer3"
+                                                                                                ? stringer3(id: id)
+                                                                                                : BomCard(id: id)),
                                 (Route<dynamic> route) => false);
                           },
                           child: Image.asset(

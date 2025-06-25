@@ -1,21 +1,31 @@
-import 'package:newqcm/CommonDrawer.dart';
-import 'package:newqcm/FqcAddEdit.dart';
-import 'package:newqcm/Ipqc.dart';
-import 'package:newqcm/Iqcp.dart';
-import 'package:newqcm/Welcomepage.dart';
-import 'package:newqcm/components/appbar.dart';
-import 'package:newqcm/constant/app_color.dart';
-import 'package:newqcm/constant/app_fonts.dart';
-import 'package:newqcm/constant/app_styles.dart';
-import 'package:newqcm/directory.dart';
+// import 'package:QCM/CommonDrawer.dart';
+// import 'package:QCM/FqcAddEdit.dart';
+// import 'package:QCM/Ipqc.dart';
+// import 'package:QCM/Iqcp.dart';
+// import 'package:QCM/Welcomepage.dart';
+// import 'package:QCM/components/appbar.dart';
+// import 'package:QCM/constant/app_color.dart';
+// import 'package:QCM/constant/app_fonts.dart';
+// import 'package:QCM/constant/app_styles.dart';
+// import 'package:QCM/directory.dart';
 import 'package:flutter/material.dart';
+import 'package:qcmapp/CommonDrawer.dart';
+import 'package:qcmapp/FqcAddEdit.dart';
+import 'package:qcmapp/Ipqc.dart';
+import 'package:qcmapp/Iqcp.dart';
+import 'package:qcmapp/Welcomepage.dart';
+import 'package:qcmapp/components/appbar.dart';
+import 'package:qcmapp/constant/app_color.dart';
+import 'package:qcmapp/constant/app_fonts.dart';
+import 'package:qcmapp/constant/app_styles.dart';
+import 'package:qcmapp/directory.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // import '../BoxCricket.dart';
 import '../constant/app_assets.dart';
 import '../main.dart';
 
 class FqcPage extends StatefulWidget {
-  const FqcPage({super.key});
+  FqcPage({Key? key}) : super(key: key);
 
   @override
   _FqcPageState createState() => _FqcPageState();
@@ -121,14 +131,14 @@ class _FqcPageState extends State<FqcPage> {
                 const SizedBox(
                   width: 10,
                 ),
-                // Expanded(
-                //     child: tabDashboard('FQC', AppAssets.fqcadd, () {
-                //   Navigator.of(context).pushAndRemoveUntil(
-                //       MaterialPageRoute(
-                //           builder: (BuildContext context) =>
-                //               FqcAddEdit(id: "")),
-                //       (Route<dynamic> route) => false);
-                // })),
+                Expanded(
+                    child: tabDashboard('FQC', AppAssets.fqcadd, () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              FqcAddEdit(id: "")),
+                      (Route<dynamic> route) => false);
+                })),
                 const SizedBox(
                   width: 10,
                 ),
@@ -153,19 +163,19 @@ class _FqcPageState extends State<FqcPage> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             InkWell(
-                // onTap: () {
-                //   Navigator.of(context).pushReplacement(MaterialPageRoute(
-                //       builder: (BuildContext context) =>
-                //           (department == 'IQCP' && designation != 'Super Admin')
-                //               ? IqcpPage()
-                //               : (department == 'IPQC' &&
-                //                       designation != 'Super Admin')
-                //                   ? IpqcPage()
-                //                   : (department == 'FQC' &&
-                //                           designation != 'Super Admin')
-                //                       ? FqcPage()
-                //                       : WelcomePage()));
-                // },
+                onTap: () {
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          (department == 'IQCP' && designation != 'Super Admin')
+                              ? IqcpPage()
+                              : (department == 'IPQC' &&
+                                      designation != 'Super Admin')
+                                  ? IpqcPage()
+                                  : (department == 'FQC' &&
+                                          designation != 'Super Admin')
+                                      ? FqcPage()
+                                      : WelcomePage()));
+                },
                 child: Image.asset(
                     home
                         ? AppAssets.icHomeSelected
@@ -231,7 +241,7 @@ class _FqcPageState extends State<FqcPage> {
                 child: Material(
                   shape: RoundedRectangleBorder(),
                   clipBehavior: Clip.hardEdge,
-                  child: Image.asset(AppAssets.icDashboard,
+                  child: new Image.asset(AppAssets.icDashboard,
                       height: 18.0, width: 18.0, color: AppColors.greyColor),
                 ),
               ),
@@ -373,7 +383,7 @@ Widget tabDashboard(String title, String img, final Function onPressed) {
                 height: 15,
               ),
               Center(
-                  child: SizedBox(
+                  child: Container(
                       height: 36,
                       width: 36,
                       child: Image.asset(

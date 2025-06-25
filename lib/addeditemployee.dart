@@ -1,13 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:newqcm/Fqc.dart';
-import 'package:newqcm/Ipqc.dart';
-import 'package:newqcm/Iqcp.dart';
-import 'package:newqcm/QualityPage.dart';
-import 'package:newqcm/components/app_loader.dart';
-import 'package:dio/src/response.dart' as Response;
-import 'package:newqcm/components/app_button_widget.dart';
-import 'package:newqcm/directory.dart';
+// import 'package:QCM/Fqc.dart';
+// import 'package:QCM/Fqcnew.dart';
+// import 'package:QCM/Ipqc.dart';
+// import 'package:QCM/Iqcp.dart';
+// import 'package:QCM/QualityPage.dart';
+// import 'package:QCM/Welcomepage.dart';
+// import 'package:QCM/components/app_loader.dart';
+// import 'package:dio/src/response.dart' as Response;
+// import 'package:QCM/components/app_button_widget.dart';
+// import 'package:QCM/directory.dart';
+import 'package:dio/dio.dart' as Response;
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -17,6 +20,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_cropper/image_cropper.dart';
+import 'package:qcmapp/Fqcnew.dart';
+import 'package:qcmapp/Ipqc.dart';
+import 'package:qcmapp/Iqcp.dart';
+import 'package:qcmapp/QualityPage.dart';
+import 'package:qcmapp/Welcomepage.dart';
+import 'package:qcmapp/components/app_button_widget.dart';
+import 'package:qcmapp/components/app_loader.dart';
+import 'package:qcmapp/directory.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toast/toast.dart';
 import 'components/appbar.dart';
@@ -216,15 +227,25 @@ class _ScoreDetailsState extends State<AddEditProfile> {
 
   Future<bool> redirectto() async {
     Navigator.push(context, MaterialPageRoute(builder: (context) {
-      return designation != "Super Admin" && department == "IQCP"
+      return designation != "Super Admin" &&
+              designation != "Admin" &&
+              department == "IQCP"
           ? IqcpPage()
-          : designation != "Super Admin" && department == "IPQC"
+          : designation != "Super Admin" &&
+                  designation != "Admin" &&
+                  department == "IPQC"
               ? IpqcPage()
-              : designation != "Super Admin" && department == "FQC"
-                  ? FqcPage()
-                  : designation != "Super Admin" && department == "QUALITY"
+              : designation != "Super Admin" &&
+                      designation != "Admin" &&
+                      department == "FQC"
+                  ? FqcNewPage()
+                  : designation != "Super Admin" &&
+                          designation != "Admin" &&
+                          department == "QUALITY"
                       ? QualityPage()
-                      : EmployeeList();
+                      : designation == "Admin"
+                          ? WelcomePage()
+                          : EmployeeList();
     }));
     return true;
   }
@@ -253,17 +274,25 @@ class _ScoreDetailsState extends State<AddEditProfile> {
                 logo: "logo",
                 onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return designation != "Super Admin" && department == "IQCP"
+                    return designation != "Super Admin" &&
+                            designation != "Admin" &&
+                            department == "IQCP"
                         ? IqcpPage()
-                        : designation != "Super Admin" && department == "IPQC"
+                        : designation != "Super Admin" &&
+                                designation != "Admin" &&
+                                department == "IPQC"
                             ? IpqcPage()
                             : designation != "Super Admin" &&
+                                    designation != "Admin" &&
                                     department == "FQC"
-                                ? FqcPage()
+                                ? FqcNewPage()
                                 : designation != "Super Admin" &&
+                                        designation != "Admin" &&
                                         department == "QUALITY"
                                     ? QualityPage()
-                                    : EmployeeList();
+                                    : designation == "Admin"
+                                        ? WelcomePage()
+                                        : EmployeeList();
                   }));
                 },
               ),
@@ -347,7 +376,7 @@ class _ScoreDetailsState extends State<AddEditProfile> {
     final prefs = await SharedPreferences.getInstance();
     site = prefs.getString('site');
 
-    final url = (site! + 'newqcm//GetDepartmentList');
+    final url = (site! + 'QCM//GetDepartmentList');
 
     http.get(
       Uri.parse(url),
@@ -368,7 +397,7 @@ class _ScoreDetailsState extends State<AddEditProfile> {
     final prefs = await SharedPreferences.getInstance();
     site = prefs.getString('site');
 
-    final url = (site! + 'newqcm/GetDesignationList');
+    final url = (site! + 'QCM/GetDesignationList');
 
     http.get(
       Uri.parse(url),
@@ -390,7 +419,7 @@ class _ScoreDetailsState extends State<AddEditProfile> {
     final prefs = await SharedPreferences.getInstance();
     site = prefs.getString('site');
 
-    final url = (site! + 'newqcm/GetWorkLocationList');
+    final url = (site! + 'QCM/GetWorkLocationList');
 
     http.get(
       Uri.parse(url),
@@ -736,7 +765,7 @@ class _ScoreDetailsState extends State<AddEditProfile> {
                                         type: FileType.image, withData: true);
                                 CroppedFile? croppedprofilepicture =
                                     await ImageCropper().cropImage(
-                                        cropStyle: CropStyle.circle,
+                                        // cropStyle: CropStyle.circle,
                                         maxWidth: 300,
                                         compressFormat: ImageCompressFormat.jpg,
                                         sourcePath:
@@ -809,7 +838,7 @@ class _ScoreDetailsState extends State<AddEditProfile> {
                                         type: FileType.image, withData: true);
                                 CroppedFile? croppedprofilepicture =
                                     await ImageCropper().cropImage(
-                                        cropStyle: CropStyle.circle,
+                                        // cropStyle: CropStyle.circle,
                                         maxWidth: 300,
                                         compressFormat: ImageCompressFormat.jpg,
                                         sourcePath:

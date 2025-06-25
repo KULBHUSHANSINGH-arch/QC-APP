@@ -1,10 +1,11 @@
 // ignore_for_file: avoid_print, prefer_const_constructors, body_might_complete_normally_nullable
 
 import 'dart:io';
-import 'package:newqcm/constant/app_color.dart';
+// import 'package:QCM/constant/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:qcmapp/constant/app_color.dart';
 
 class AppHelper {
   static void hideKeyboard(BuildContext context) {
@@ -80,6 +81,7 @@ class AppHelper {
   }
 
   static bool isPhoneNoValid(String phoneNo) {
+    if (phoneNo == null) return false;
     final regExp = RegExp(r'(^(?:[+0]9)?[0-9]{10,12}$)');
     return regExp.hasMatch(phoneNo);
   }

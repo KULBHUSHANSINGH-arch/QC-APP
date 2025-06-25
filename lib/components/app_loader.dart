@@ -1,11 +1,13 @@
-import 'package:newqcm/constant/app_assets.dart';
-import 'package:newqcm/constant/app_color.dart';
+// import 'package:QCM/constant/app_assets.dart';
+// import 'package:QCM/constant/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:qcmapp/constant/app_assets.dart';
+import 'package:qcmapp/constant/app_color.dart';
 
 class AppLoader extends StatelessWidget {
   final String? organization;
-  const AppLoader({this.organization, super.key});
+  const AppLoader({this.organization, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

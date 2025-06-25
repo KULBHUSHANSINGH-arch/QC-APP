@@ -1,27 +1,39 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:newqcm/Fqc.dart';
-import 'package:newqcm/Ipqc.dart';
-import 'package:newqcm/Iqcp.dart';
-import 'package:newqcm/QualityPage.dart';
-import 'package:newqcm/Welcomepage.dart';
-import 'package:newqcm/components/app_button_widget.dart';
-import 'package:newqcm/components/app_loader.dart';
-import 'package:newqcm/constant/app_assets.dart';
-import 'package:newqcm/constant/app_color.dart';
-import 'package:newqcm/constant/app_fonts.dart';
-import 'package:newqcm/constant/app_helper.dart';
-import 'package:newqcm/constant/app_styles.dart';
+// import 'package:QCM/Fqc.dart';
+// import 'package:QCM/Fqcnew.dart';
+// import 'package:QCM/Ipqc.dart';
+// import 'package:QCM/Iqcp.dart';
+// import 'package:QCM/QualityPage.dart';
+// import 'package:QCM/Welcomepage.dart';
+// import 'package:QCM/components/app_button_widget.dart';
+// import 'package:QCM/components/app_loader.dart';
+// import 'package:QCM/constant/app_assets.dart';
+// import 'package:QCM/constant/app_color.dart';
+// import 'package:QCM/constant/app_fonts.dart';
+// import 'package:QCM/constant/app_helper.dart';
+// import 'package:QCM/constant/app_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:qcmapp/Fqcnew.dart';
+import 'package:qcmapp/Ipqc.dart';
+import 'package:qcmapp/Iqcp.dart';
+import 'package:qcmapp/QualityPage.dart';
+import 'package:qcmapp/Welcomepage.dart';
+import 'package:qcmapp/components/app_button_widget.dart';
+import 'package:qcmapp/components/app_loader.dart';
+import 'package:qcmapp/constant/app_assets.dart';
+import 'package:qcmapp/constant/app_color.dart';
+import 'package:qcmapp/constant/app_fonts.dart';
+import 'package:qcmapp/constant/app_helper.dart';
+import 'package:qcmapp/constant/app_styles.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:device_info_plus/device_info_plus.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:toast/toast.dart';
 
 class LoginPage extends StatefulWidget {
   final String? appName;
   LoginPage({this.appName});
-  // const LoginPage({super.key, this.appName});
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -35,30 +47,28 @@ class _LoginPageState extends State<LoginPage> {
 
   List device = [];
   bool otpsend = false, _isLoading = false;
-  // String? uid, deviceType, designation, department;
   String? uid,
       deviceType,
       designation,
       department,
       workLocation,
-      versionNo = "V1.0.20241125.1814";
-  // static final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+      versionNo = "V1.0.20250531.1612";
+  static final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
 
   // String path = "http://192.168.1.8:8080/"; //local
   // String path =
-  //     "https://fair-gray-gharial-wig.cyclic.app/"; // newqcm Cyclic Dev
+  //     "https://fair-gray-gharial-wig.cyclic.app/"; // QCM Cyclic Dev
 
   // String path =
-  //     "https://emp56gfc2b.ap-south-1.awsapprunner.com/"; // newqcm AWS Dev
+  //     "https://emp56gfc2b.ap-south-1.awsapprunner.com/"; // QCM AWS Dev
   // String path =
-  //     "https://sore-rose-kingfisher-tutu.cyclic.app/"; // newqcm App Cyclic Prod
+  //     "https://sore-rose-kingfisher-tutu.cyclic.app/"; // QCM App Cyclic Prod
 
   // String path = "https://xvvmywehv3.ap-south-1.awsapprunner.com/"; // AWS Prod
 
-  // String path = "http://srv515471.hstgr.cloud:8080/"; // Hostinger New Dev
   // String path = "http://srv515471.hstgr.cloud:8081/"; // Hostinger New Prod
 
-  String path = "http://srv515471.hstgr.cloud:8080/"; // Hostinger DevSR
+  String path = "https://maintenance.umanerp.com/api/"; // Hostinger DevSRR
 
   // String path = "http://srv515471.hstgr.cloud:9090/"; // Hostinger Prod
 
@@ -73,7 +83,6 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _isLoading = true;
     });
-    // final url = ('${path}Employee/Login');
     final url = (path + 'Employee/Login');
     var params = {
       "loginid": loginid,
@@ -90,7 +99,6 @@ class _LoginPageState extends State<LoginPage> {
     );
     print("Loginnnnnn");
     print(response.body);
-    print(response.statusCode);
     if (response.statusCode == 400) {
       setState(() {
         _isLoading = false;
@@ -98,13 +106,6 @@ class _LoginPageState extends State<LoginPage> {
       var objData = json.decode(response.body);
       print("Passsssss");
       print(objData);
-      // if (objData['msg'] == "Wrong Password") {
-      //   Toast.show("Password is not valid.",
-      //       duration: Toast.lengthLong,
-      //       gravity: Toast.center,
-      //       backgroundColor: Colors.red);
-      // }
-
       if (objData['msg'] == "Wrong Password") {
         Toast.show("Password is not valid.",
             duration: Toast.lengthLong,
@@ -152,30 +153,37 @@ class _LoginPageState extends State<LoginPage> {
 
             prefs.setString(
                 'designation', objData['PersonData'][0]['Designation'] ?? '');
-
             prefs.setString(
                 'workLocation', objData['PersonData'][0]['WorkLocation'] ?? '');
+            prefs.setString('WorkLocationName',
+                objData['PersonData'][0]['WorkLocationName'] ?? '');
 
             prefs.setString('fullname', objData['PersonData'][0]['Name'] ?? '');
             prefs.setString(
                 'department', objData['PersonData'][0]['Department'] ?? '');
+            prefs.setString('versionNo', versionNo!);
             prefs.setString(
                 'pic', objData['PersonData'][0]['ProfileImg'] ?? '');
-            prefs.setString('versionNo', versionNo!);
             designation = prefs.getString('designation')!;
             department = prefs.getString('department')!;
             workLocation = prefs.getString('workLocation')!;
 
             Navigator.of(context).pushReplacement(MaterialPageRoute(
                 builder: (BuildContext context) => (department == 'IQCP' &&
-                        designation != 'Super Admin')
+                        designation != 'Super Admin' &&
+                        designation != 'Admin')
                     ? IqcpPage()
-                    : (department == 'IPQC' && designation != 'Super Admin')
+                    : (department == 'IPQC' &&
+                            designation != 'Super Admin' &&
+                            designation != 'Admin')
                         ? IpqcPage()
-                        : (department == 'FQC' && designation != 'Super Admin')
-                            ? FqcPage()
+                        : (department == 'FQC' &&
+                                designation != 'Super Admin' &&
+                                designation != 'Admin')
+                            ? FqcNewPage()
                             : (department == 'QUALITY' &&
-                                    designation != 'Super Admin')
+                                    designation != 'Super Admin' &&
+                                    designation != 'Admin')
                                 ? QualityPage()
                                 : WelcomePage()));
           });

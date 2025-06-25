@@ -1,6 +1,6 @@
 {
-    "name": "newqcm",
-    "short_name": "newqcm",
+    "name": "qcmapp",
+    "short_name": "qcmapp",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

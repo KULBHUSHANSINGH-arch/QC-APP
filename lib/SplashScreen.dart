@@ -1,15 +1,23 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:newqcm/Fqc.dart';
-import 'package:newqcm/Ipqc.dart';
-import 'package:newqcm/Iqcp.dart';
-import 'package:newqcm/LoginPage.dart';
-import 'package:newqcm/QualityPage.dart';
-import 'package:newqcm/Welcomepage.dart';
-import 'package:newqcm/constant/app_assets.dart';
-import 'package:newqcm/directory.dart';
-// import 'package:cached_network_image/cached_network_image.dart';
+// import 'package:QCM/Fqc.dart';
+// import 'package:QCM/Fqcnew.dart';
+// import 'package:QCM/Ipqc.dart';
+// import 'package:QCM/Iqcp.dart';
+// import 'package:QCM/LoginPage.dart';
+// import 'package:QCM/QualityPage.dart';
+// import 'package:QCM/Welcomepage.dart';
+// import 'package:QCM/constant/app_assets.dart';
+// import 'package:QCM/directory.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:qcmapp/Fqcnew.dart';
+import 'package:qcmapp/Ipqc.dart';
+import 'package:qcmapp/Iqcp.dart';
+import 'package:qcmapp/LoginPage.dart';
+import 'package:qcmapp/QualityPage.dart';
+import 'package:qcmapp/Welcomepage.dart';
+import 'package:qcmapp/constant/app_assets.dart';
 // import 'package:lbn_flutter_project/LoginPage.dart';
 // import 'package:lbn_flutter_project/constant/app_assets.dart';
 // import 'package:lbn_flutter_project/constant/app_strings.dart';
@@ -20,7 +28,7 @@ import 'package:http/http.dart' as http;
 class SplashScreen extends StatefulWidget {
   final String? apptype;
 
-  const SplashScreen({super.key, this.apptype});
+  SplashScreen({this.apptype});
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
@@ -28,7 +36,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   List splashscreen = [];
   String? screen;
-  late String pic, site, designation, department, personid;
+  String? pic, site, designation, department, personid;
   // _get() async {
   //   print("Bhanuuuuuuuu.....>???");
   //   print(widget.apptype);
@@ -66,19 +74,29 @@ class _SplashScreenState extends State<SplashScreen> {
     Future.delayed(Duration(seconds: 2), () async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       bool? isLoggedIn = prefs.getBool('islogin');
+      String? designation = prefs.getString('designation');
+      String? department = prefs.getString('department');
+      print("DesignationQ");
+      print(designation);
       if (isLoggedIn ?? false) {
         Timer(
             Duration(seconds: 2),
             () => Navigator.of(context).pushReplacement(MaterialPageRoute(
                 builder: (BuildContext context) => (department == 'IQCP' &&
-                        designation != 'Super Admin')
+                        designation != 'Super Admin' &&
+                        designation != 'Admin')
                     ? IqcpPage()
-                    : (department == 'IPQC' && designation != 'Super Admin')
+                    : (department == 'IPQC' &&
+                            designation != 'Super Admin' &&
+                            designation != 'Admin')
                         ? IpqcPage()
-                        : (department == 'FQC' && designation != 'Super Admin')
-                            ? FqcPage()
+                        : (department == 'FQC' &&
+                                designation != 'Super Admin' &&
+                                designation != 'Admin')
+                            ? FqcNewPage()
                             : (department == 'QUALITY' &&
-                                    designation != 'Super Admin')
+                                    designation != 'Super Admin' &&
+                                    designation != 'Admin')
                                 ? QualityPage()
                                 : WelcomePage())));
       } else {
@@ -109,28 +127,28 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     String Apptype = widget.apptype ?? '';
     return Scaffold(
-      backgroundColor: Colors.white,
-      // body: CachedNetworkImage(
-      //   imageUrl: screen ?? '',
-      //   width: MediaQuery.of(context).size.width,
-      //   height: MediaQuery.of(context).size.height,
-      //   fit: BoxFit.fill,
-      //   errorWidget: (context, url, error) {
-      //     return Image.asset(
-      //       AppAssets.splashscreen,
-      //       width: MediaQuery.of(context).size.width,
-      //       height: MediaQuery.of(context).size.height,
-      //       fit: BoxFit.fill,
-      //     );
-      //   },
-      // )
+        backgroundColor: Colors.white,
+        body: CachedNetworkImage(
+          imageUrl: screen ?? '',
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          fit: BoxFit.fill,
+          errorWidget: (context, url, error) {
+            return Image.asset(
+              AppAssets.splashscreen,
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              fit: BoxFit.fill,
+            );
+          },
+        )
 
-      //   Image.asset(
-      // AppAssets.imgSplashBg,
-      // width: MediaQuery.of(context).size.width,
-      // height: MediaQuery.of(context).size.height,
-      // fit: BoxFit.fill,
-      // ),
-    );
+        //   Image.asset(
+        // AppAssets.imgSplashBg,
+        // width: MediaQuery.of(context).size.width,
+        // height: MediaQuery.of(context).size.height,
+        // fit: BoxFit.fill,
+        // ),
+        );
   }
 }

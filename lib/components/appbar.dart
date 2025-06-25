@@ -1,10 +1,18 @@
-import 'package:newqcm/addeditemployee.dart';
-import 'package:newqcm/constant/app_assets.dart';
-// import 'package:cached_network_image/cached_network_image.dart';
+// import 'package:QCM/addeditemployee.dart';
+// import 'package:QCM/constant/app_assets.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:qcmapp/addeditemployee.dart';
+import 'package:qcmapp/constant/app_assets.dart';
+//import 'package:galo_energy/constant/app_assets.dart';
+// import 'package:galo_energy/SplashDashbaordScreen.dart';
+// import 'package:galo_energy/SplashScreen.dart';
+// import 'package:galo_energy/constant/app_assets.dart';
+// import 'package:galo_energy/constant/app_color.dart';
 
-/// * One Comment in AddEditProfile
+// import '../add_edit/EditProfile.dart';
+// import '../home_page.dart';
 
 class GautamAppBar extends StatelessWidget implements PreferredSizeWidget {
   final isBackRequired;
@@ -16,7 +24,7 @@ class GautamAppBar extends StatelessWidget implements PreferredSizeWidget {
   final organization;
 
   const GautamAppBar({
-    super.key,
+    Key? key,
     this.isBackRequired = false,
     this.onTap,
     this.organization,
@@ -24,7 +32,7 @@ class GautamAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.logo,
     this.memberId,
     this.imgPath,
-  });
+  }) : super(key: key);
 
   isDarkMode(BuildContext context) {
     final brightness = MediaQuery.of(context).platformBrightness;
@@ -74,46 +82,46 @@ class GautamAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             InkWell(
                 onTap: () {
-                  // Navigator.of(context).pushAndRemoveUntil(
-                  //     MaterialPageRoute(
-                  //         builder: (BuildContext context) =>
-                  //             AddEditProfile(id: memberId)),
-                  //     (Route<dynamic> route) => false);
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              AddEditProfile(id: memberId)),
+                      (Route<dynamic> route) => false);
                 },
-                child: SizedBox(
+                child: Container(
                   width: 35,
                   child: ClipOval(
-                      // child: CachedNetworkImage(
-                      //   imageUrl: (memberPic ?? ''),
-                      //   height: 48,
-                      //   width: 48,
-                      //   fit: BoxFit.cover,
-                      //   placeholder: (context, url) {
-                      //     return CircleAvatar(
-                      //       radius: 20,
-                      //       child: ClipOval(
-                      //         child: Image.asset(
-                      //           AppAssets.profilePlaceholder,
-                      //           height: 40,
-                      //           width: 40,
-                      //         ),
-                      //       ),
-                      //     );
-                      //   },
-                      //   errorWidget: (context, url, error) {
-                      //     return CircleAvatar(
-                      //       radius: 20,
-                      //       child: ClipOval(
-                      //         child: Image.asset(
-                      //           AppAssets.profilePlaceholder,
-                      //           height: 40,
-                      //           width: 40,
-                      //         ),
-                      //       ),
-                      //     );
-                      //   },
-                      // ),
-                      ),
+                    child: CachedNetworkImage(
+                      imageUrl: (memberPic ?? ''),
+                      height: 48,
+                      width: 48,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) {
+                        return CircleAvatar(
+                          radius: 20,
+                          child: ClipOval(
+                            child: Image.asset(
+                              AppAssets.profilePlaceholder,
+                              height: 40,
+                              width: 40,
+                            ),
+                          ),
+                        );
+                      },
+                      errorWidget: (context, url, error) {
+                        return CircleAvatar(
+                          radius: 20,
+                          child: ClipOval(
+                            child: Image.asset(
+                              AppAssets.profilePlaceholder,
+                              height: 40,
+                              width: 40,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                 )),
           ],
         ),
@@ -121,19 +129,19 @@ class GautamAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         Padding(
           padding: EdgeInsets.only(right: 12),
-          // child: CachedNetworkImage(
-          //   imageUrl: (imgPath + (logo ?? '')),
-          //   fit: BoxFit.fitWidth,
-          //   width: MediaQuery.of(context).size.width * 0.14,
-          //   errorWidget: (context, url, error) {
-          //     return Image.asset(
-          //       AppAssets.icAppLogoHorizontal,
-          //       // AppAssets.getAppLogo;
-          //       fit: BoxFit.fitWidth,
-          //       width: MediaQuery.of(context).size.width * 0.38,
-          //     );
-          //   },
-          // ),
+          child: CachedNetworkImage(
+            imageUrl: (imgPath + (logo ?? '')),
+            fit: BoxFit.fitWidth,
+            width: MediaQuery.of(context).size.width * 0.14,
+            errorWidget: (context, url, error) {
+              return Image.asset(
+                AppAssets.icAppLogoHorizontal,
+                // AppAssets.getAppLogo;
+                fit: BoxFit.fitWidth,
+                width: MediaQuery.of(context).size.width * 0.38,
+              );
+            },
+          ),
         )
       ],
     );

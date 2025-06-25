@@ -1,5 +1,7 @@
+// import 'package:QCM/dialogs/role_list_model.dart';
 import 'package:flutter/material.dart';
-import 'package:newqcm/constant/role_list_model.dart';
+import 'package:qcmapp/constant/role_list_model.dart';
+// import 'package:QCM/dialogs/role_list_model.dart';
 import '../constant/app_color.dart';
 import '../constant/app_fonts.dart';
 import '../constant/app_styles.dart';
@@ -8,10 +10,10 @@ class DialogRole extends StatefulWidget {
   final RoleModel? data;
   final String? ImagePath;
   const DialogRole({
-    super.key,
+    Key? key,
     this.data,
     this.ImagePath,
-  });
+  }) : super(key: key);
 
   @override
   _DialogRoleState createState() => _DialogRoleState();
@@ -86,7 +88,7 @@ class _DialogRoleState extends State<DialogRole> {
                           });
                         } else {
                           List<RoleList> filterCountryList = [];
-                          for (var Person in personList) {
+                          personList.forEach((Person) {
                             if ((Person.stringmapname!
                                     .toLowerCase()
                                     .contains(value.toLowerCase())) ||
@@ -95,7 +97,7 @@ class _DialogRoleState extends State<DialogRole> {
                                     .contains(value.toLowerCase()))) {
                               filterCountryList.add(Person);
                             }
-                          }
+                          });
                           setState(() {
                             personList = filterCountryList;
                           });

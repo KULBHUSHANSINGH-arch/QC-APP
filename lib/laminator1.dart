@@ -1,26 +1,36 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:newqcm/components/app_loader.dart';
-import 'package:newqcm/components/appbar.dart';
-import 'package:newqcm/ipqcTestList.dart';
-import 'package:newqcm/machineCard.dart';
+// import 'package:QCM/components/app_loader.dart';
+// import 'package:QCM/components/appbar.dart';
+// import 'package:QCM/ipqcTestList.dart';
+// import 'package:QCM/machineCard.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:qcmapp/components/app_button_widget.dart';
+import 'package:qcmapp/components/app_loader.dart';
+import 'package:qcmapp/components/appbar.dart';
+import 'package:qcmapp/constant/app_assets.dart';
+import 'package:qcmapp/constant/app_color.dart';
+import 'package:qcmapp/constant/app_fonts.dart';
+import 'package:qcmapp/constant/app_helper.dart';
+import 'package:qcmapp/constant/app_styles.dart';
+import 'package:qcmapp/ipqcTestList.dart';
+import 'package:qcmapp/machineCard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:dio/src/response.dart' as Response;
-import 'package:newqcm/components/app_button_widget.dart';
-import 'package:newqcm/constant/app_assets.dart';
-import 'package:newqcm/constant/app_color.dart';
-import 'package:newqcm/constant/app_fonts.dart';
-import 'package:newqcm/constant/app_helper.dart';
-import 'package:newqcm/constant/app_styles.dart';
+// import 'package:QCM/components/app_button_widget.dart';
+// import 'package:QCM/constant/app_assets.dart';
+// import 'package:QCM/constant/app_color.dart';
+// import 'package:QCM/constant/app_fonts.dart';
+// import 'package:QCM/constant/app_helper.dart';
+// import 'package:QCM/constant/app_styles.dart';
 import 'package:toast/toast.dart';
 
 class laminator1 extends StatefulWidget {
@@ -120,11 +130,14 @@ class _laminator1State extends State<laminator1> {
   String dateOfQualityCheck = '';
   List<int>? referencePdfFileBytes;
   bool? isCycleTimeTrue;
+  List locationList = [];
+
   bool? isBacksheetCuttingTrue;
   String selectedShift = "Day Shift";
   late String sendStatus;
   String status = '',
       jobCarId = '',
+      WorkLocation = '',
       approvalStatus = "Approved",
       designation = '',
       token = '',
@@ -154,8 +167,7 @@ class _laminator1State extends State<laminator1> {
       specification13Controller.text = "Specification 150| Tolerance None";
       specification14Controller.text = "Specification 160| Tolerance None";
       specification15Controller.text = "Specification 140| Tolerance None";
-      specification16Controller.text =
-          "Specification (max 15000-20000)| Tolerance None";
+      specification16Controller.text = "Specification (25000)| Tolerance None";
     });
   }
 
@@ -168,8 +180,49 @@ class _laminator1State extends State<laminator1> {
       designation = prefs.getString('designation')!;
       department = prefs.getString('department')!;
       token = prefs.getString('token')!;
+      WorkLocation = prefs.getString('workLocation')!;
     });
     _get();
+    getLocationData();
+  }
+
+  getLocationData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    site = prefs.getString('site')!;
+    print("site URL: $site");
+
+    if (site == null) {
+      print('Site URL is null or empty.');
+      return;
+    }
+
+    final url = (site! + 'Employee/WorkLocationList');
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        var designationBody = jsonDecode(response.body);
+        print("Location List: $designationBody");
+
+        if (mounted) {
+          setState(() {
+            locationList = designationBody['data'];
+          });
+          print("locationList: $locationList");
+        }
+      } else {
+        print("Failed to load data: ${response.statusCode}");
+      }
+    } catch (e) {
+      print('Error fetching location data: $e');
+    }
   }
 
   Future _get() async {
@@ -201,6 +254,7 @@ class _laminator1State extends State<laminator1> {
         if (resBody != '') {
           status = resBody['response']['Status'] ?? '';
           dateOfQualityCheck = resBody['response']['Date'] ?? '';
+          WorkLocation = resBody['response']['WorkLocation'] ?? '';
           dateController.text = resBody['response']['Date'] != ''
               ? DateFormat("EEE MMM dd, yyyy").format(
                   DateTime.parse(resBody['response']['Date'].toString()))
@@ -294,7 +348,7 @@ class _laminator1State extends State<laminator1> {
     }
   }
 
-  Future setApprovalStatus() async {
+  Future setApprovalStatus(approvalStatus, id) async {
     setState(() {
       _isLoading = true;
     });
@@ -306,7 +360,7 @@ class _laminator1State extends State<laminator1> {
       "token": token,
       "CurrentUser": personid,
       "ApprovalStatus": approvalStatus,
-      "JobCardDetailId": widget.id ?? ""
+      "JobCardDetailId": id ?? ""
     };
 
     var response = await http.post(
@@ -359,6 +413,18 @@ class _laminator1State extends State<laminator1> {
   }
 
   Future createData() async {
+    if (sendStatus == "Pending") {
+      print("Inside");
+      print(sendStatus);
+      print(widget.id);
+      setApprovalStatus(
+          "Pending",
+          jobCarId != '' && jobCarId != null
+              ? jobCarId
+              : widget.id != '' && widget.id != null
+                  ? widget.id
+                  : '');
+    }
     var data = {
       "JobCardDetailId": jobCarId != '' && jobCarId != null
           ? jobCarId
@@ -369,6 +435,7 @@ class _laminator1State extends State<laminator1> {
       "DocNo": "GSPL/IPQC/LM/008",
       "RevNo": "1.0 dated 12.08.2023",
       "Date": dateOfQualityCheck,
+      'WorkLocation': WorkLocation,
       "Shift": selectedShift,
       "Location": [
         {"Locationfield": position1Controller.text},
@@ -497,6 +564,9 @@ class _laminator1State extends State<laminator1> {
         'Content-Type': 'application/json; charset=UTF-8',
       },
     );
+    print('Checking Response');
+    print(response);
+
     if (response.statusCode == 200) {
       var objData = json.decode(response.body);
       setState(() {
@@ -737,6 +807,61 @@ class _laminator1State extends State<laminator1> {
                                     const SizedBox(
                                       height: 15,
                                     ),
+                                    if (designation == "Super Admin")
+                                      Text(
+                                        "Work Location",
+                                        style:
+                                            AppStyles.textfieldCaptionTextStyle,
+                                      ),
+                                    if (designation == "Super Admin")
+                                      const SizedBox(
+                                        height: 4,
+                                      ),
+                                    if (designation == "Super Admin")
+                                      DropdownButtonFormField<String>(
+                                        decoration: AppStyles
+                                            .textFieldInputDecoration
+                                            .copyWith(
+                                          hintText: "Select Work Location",
+                                          counterText: '',
+                                          contentPadding: EdgeInsets.all(10),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                20), // Rounded borders
+                                          ),
+                                        ),
+                                        items: locationList
+                                            .map((label) => DropdownMenuItem(
+                                                  child: Text(
+                                                    label['workLocationName'],
+                                                    style: AppStyles
+                                                        .textInputTextStyle,
+                                                  ),
+                                                  value: label['workLocationId']
+                                                      .toString(),
+                                                ))
+                                            .toList(),
+                                        onChanged: designation != "Super Admin"
+                                            ? null
+                                            : (val) {
+                                                setState(() {
+                                                  WorkLocation = val!;
+                                                });
+                                              },
+                                        value: WorkLocation != ''
+                                            ? WorkLocation
+                                            : null,
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'Please Select Work Location';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                    if (designation == "Super Admin")
+                                      const SizedBox(
+                                        height: 15,
+                                      ),
                                     Text(
                                       "Date",
                                       style:
@@ -2296,7 +2421,8 @@ class _laminator1State extends State<laminator1> {
                                                   fontSize: 16),
                                               onTap: () {
                                                 AppHelper.hideKeyboard(context);
-                                                setApprovalStatus();
+                                                setApprovalStatus(
+                                                    "Approve", widget.id);
                                               },
                                               label: "Approve",
                                               organization: '',

@@ -1,5 +1,6 @@
+// import 'package:QCM/constant/app_assets.dart';
 import 'package:flutter/material.dart';
-import 'package:newqcm/constant/app_assets.dart';
+import 'package:qcmapp/constant/app_assets.dart';
 
 class TabIconData {
   TabIconData({

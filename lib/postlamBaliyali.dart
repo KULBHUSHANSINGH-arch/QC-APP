@@ -1,10 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
+// import 'package:QCM/Ipqc.dart';
+// import 'package:QCM/components/app_button_widget.dart';
+// import 'package:QCM/components/app_loader.dart';
+// import 'package:QCM/ipqcTestList.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:form_field_validator/form_field_validator.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:newqcm/Ipqc.dart';
-import 'package:newqcm/components/app_button_widget.dart';
-import 'package:newqcm/components/app_loader.dart';
-import 'package:newqcm/ipqcTestList.dart';
+// import 'package:newqcm/Ipqc.dart';
+// import 'package:newqcm/components/app_button_widget.dart';
+// import 'package:newqcm/components/app_loader.dart';
+// import 'package:newqcm/ipqcTestList.dart';
 import 'package:dio/dio.dart';
 // import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +19,10 @@ import 'package:flutter/rendering.dart';
 // import 'package:form_field_validator/form_field_validator.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:intl/intl.dart';
+import 'package:qcmapp/Ipqc.dart';
+import 'package:qcmapp/components/app_button_widget.dart';
+import 'package:qcmapp/components/app_loader.dart';
+import 'package:qcmapp/ipqcTestList.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 import 'package:toast/toast.dart';
@@ -438,6 +449,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
   String status = '',
       prelamId = '',
       approvalStatus = "Approved",
+      WorkLocation = '',
       designation = '',
       token = '',
       department = '';
@@ -602,6 +614,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
   }
 
   Future createData() async {
+    if (sendStatus == "Pending") {
+      setApprovalStatuss(prelamId != '' && prelamId != null
+          ? prelamId
+          : widget.id != '' && widget.id != null
+              ? widget.id
+              : '');
+    }
     var data = [
       {
         "PreLamDetailId": prelamId != ''
@@ -615,6 +634,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
         "DocNo": "GSPL/IPQC/IPC/003",
         "RevNo": "1.0 dated 12.08.2023",
         "Date": dateOfPostLam,
+        "WorkLocation": WorkLocation,
         "Shift": selectedShift,
         "Line": lineController.text,
         "PONo": poController.text
@@ -968,6 +988,8 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
         },
       ]
     ];
+    print('Payloadssss');
+    print(data);
 
     setState(() {
       _isLoading = true;
@@ -1004,7 +1026,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
           uploadImages(prelamId);
         }
         if (sendStatus == 'Pending') {
-          uploadPDF((referencePdfFileBytes ?? []));
+          // uploadPDF((referencePdfFileBytes ?? []));
+          Toast.show("PreLam Test Completed.",
+              duration: Toast.lengthLong,
+              gravity: Toast.center,
+              backgroundColor: AppColors.blueColor);
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (BuildContext context) => IpqcTestList()));
         } else {
           Toast.show("Data has been saved.",
               duration: Toast.lengthLong,
@@ -1019,12 +1047,126 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
   }
 
   /*** Camera Method */
+  // Future<void> _openCamera(
+  //   TextEditingController controller,
+  //   String imageKey,
+  //   String type,
+  //   String stage,
+  // ) async {
+  //   if (controller.text.startsWith('http')) {
+  //     // If it's already a URL, don't try to re-upload
+  //     return;
+  //   }
+  //   try {
+  //     final ImagePicker _picker = ImagePicker();
+
+  //     // Open the camera and capture an image
+  //     XFile? image = await _picker.pickImage(source: ImageSource.camera);
+
+  //     if (image != null) {
+  //       final String currentDateTime =
+  //           DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+
+  //       setState(() {
+  //         controller.text = image.path; // Display image path in the field
+
+  //         // Add to the list with type and stage
+  //         _capturedImages.add(
+  //           ImageMetadata(
+  //             imageKey: imageKey,
+  //             imagePath: image.path,
+  //             timestamp: currentDateTime,
+  //             type: type,
+  //             stage: stage,
+  //           ),
+  //         );
+  //       });
+
+  //       print("✅ Image Captured and Stored: $imageKey, $currentDateTime");
+  //     } else {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         const SnackBar(content: Text('Camera operation canceled')),
+  //       );
+  //     }
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Error capturing image: $e')),
+  //     );
+  //   }
+  // }
+  // Future<void> _openCamera(
+  //   TextEditingController controller,
+  //   String imageKey,
+  //   String type,
+  //   String stage,
+  // ) async {
+  //   if (controller.text.startsWith('http')) {
+  //     // If it's already a URL, don't try to re-upload
+  //     return;
+  //   }
+  //   try {
+  //     final ImagePicker _picker = ImagePicker();
+
+  //     // Open the camera and capture an image
+  //     XFile? image = await _picker.pickImage(source: ImageSource.camera);
+
+  //     if (image != null) {
+  //       final String currentDateTime =
+  //           DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+
+  //       setState(() {
+  //         controller.text = image.path; // Display image path in the field
+
+  //         // Check if the key already exists in the list
+  //         int existingIndex = _capturedImages.indexWhere(
+  //           (img) => img.imageKey == imageKey,
+  //         );
+
+  //         if (existingIndex != -1) {
+  //           // Replace the existing entry with the new one
+  //           _capturedImages[existingIndex] = ImageMetadata(
+  //             imageKey: imageKey,
+  //             imagePath: image.path,
+  //             timestamp: currentDateTime,
+  //             type: type,
+  //             stage: stage,
+  //           );
+  //           print("🔄 Image Updated: $imageKey, $currentDateTime");
+  //         } else {
+  //           // Add a new entry if it doesn't exist
+  //           _capturedImages.add(
+  //             ImageMetadata(
+  //               imageKey: imageKey,
+  //               imagePath: image.path,
+  //               timestamp: currentDateTime,
+  //               type: type,
+  //               stage: stage,
+  //             ),
+  //           );
+  //           print("✅ Image Captured and Stored: $imageKey, $currentDateTime");
+  //         }
+  //       });
+  //     } else {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         const SnackBar(content: Text('Camera operation canceled')),
+  //       );
+  //     }
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Error capturing image: $e')),
+  //     );
+  //   }
+  // }
   Future<void> _openCamera(
     TextEditingController controller,
     String imageKey,
     String type,
     String stage,
   ) async {
+    if (controller.text.startsWith('http')) {
+      // If it's already a URL, don't try to re-upload
+      return;
+    }
     try {
       final ImagePicker _picker = ImagePicker();
 
@@ -1035,22 +1177,42 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
         final String currentDateTime =
             DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
 
-        setState(() {
-          controller.text = image.path; // Display image path in the field
+        // Compress the image
+        final compressedImage = await _compressImage(File(image.path));
 
-          // Add to the list with type and stage
-          _capturedImages.add(
-            ImageMetadata(
+        setState(() {
+          controller.text =
+              compressedImage.path; // Display compressed image path
+
+          // Check if the key already exists in the list
+          int existingIndex = _capturedImages.indexWhere(
+            (img) => img.imageKey == imageKey,
+          );
+
+          if (existingIndex != -1) {
+            // Replace the existing entry with the new one
+            _capturedImages[existingIndex] = ImageMetadata(
               imageKey: imageKey,
-              imagePath: image.path,
+              imagePath: compressedImage.path,
               timestamp: currentDateTime,
               type: type,
               stage: stage,
-            ),
-          );
+            );
+            print("🔄 Image Updated: $imageKey, $currentDateTime");
+          } else {
+            // Add a new entry if it doesn't exist
+            _capturedImages.add(
+              ImageMetadata(
+                imageKey: imageKey,
+                imagePath: compressedImage.path,
+                timestamp: currentDateTime,
+                type: type,
+                stage: stage,
+              ),
+            );
+            print("✅ Image Captured and Stored: $imageKey, $currentDateTime");
+          }
         });
-
-        print("✅ Image Captured and Stored: $imageKey, $currentDateTime");
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Camera operation canceled')),
@@ -1063,9 +1225,35 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
     }
   }
 
+  Future<XFile> _compressImage(File file) async {
+    final compressedImage = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path, // Original file path
+      '${file.parent.path}/compressed_${file.uri.pathSegments.last}', // Compressed file path
+      quality: 50, // Compression quality (0-100)
+    );
+
+    if (compressedImage == null) {
+      throw Exception("Image compression failed");
+    }
+
+    return compressedImage;
+  }
+
 /*** API Intregration for Camera */
   Future<void> uploadImages(String prelamId) async {
     try {
+      bool hasLocalImages =
+          _capturedImages.any((image) => !image.imagePath.startsWith('http'));
+
+      if (!hasLocalImages) {
+        print("⚠️ No new images to upload. Skipping upload call.");
+        Toast.show(
+          "No new images to upload.",
+          duration: Toast.lengthShort,
+          gravity: Toast.center,
+        );
+        return;
+      }
       var formData = FormData();
 
       // Add the PreLamDetailId (UUID)
@@ -1073,6 +1261,11 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
 
       // Add images with their metadata
       for (var image in _capturedImages) {
+        if (image.imagePath.startsWith('http')) {
+          // Skip images already uploaded
+          print("⏭️ Skipping already uploaded image: ${image.imagePath}");
+          continue;
+        }
         final bytes = await File(image.imagePath).readAsBytes();
         final fileName =
             '${image.imageKey}_${DateTime.now().microsecondsSinceEpoch}.jpg';
@@ -1149,6 +1342,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
       designation = prefs.getString('designation')!;
       department = prefs.getString('department')!;
       token = prefs.getString('token')!;
+      WorkLocation = prefs.getString('workLocation')!;
     });
     _get();
   }
@@ -1187,33 +1381,6 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
   //         selectedShift = resBody['response']['Shift'] ?? '';
   //         lineController.text = resBody['response']['Line'] ?? '';
   //         poController.text = resBody['response']['PONo'] ?? '';
-  //         // Trimming
-
-  //         // Post Lam
-
-  //         // framing
-
-  //         // Junction box Assembly
-
-  //         // Curing
-
-  //         //Buffing
-
-  //         //Cleaning
-
-  //         // Sun Simulator
-
-  //         //Hipot
-
-  //         //FinalEl
-
-  //         // Rfid
-
-  //         // Black Label
-
-  //         // Dimension measurement
-
-  //         // Packaging
 
   //         referencePdfController.text = resBody['response']['PreLamPdf'] ?? '';
   //       }
@@ -1229,7 +1396,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
     final url = ("${site!}IPQC/UpdatePreLamStatus");
 
     var params = {
-      "Type": "PostlamBaliyali",
+      "Type": "Postlam Baliyali",
       "token": token,
       "CurrentUser": personid,
       "ApprovalStatus": approvalStatus,
@@ -1255,7 +1422,54 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
             gravity: Toast.center,
             backgroundColor: AppColors.redColor);
       } else {
-        Toast.show("Post Lam Test $approvalStatus .",
+        Toast.show("Post Lam Baliyali Test $approvalStatus .",
+            duration: Toast.lengthLong,
+            gravity: Toast.center,
+            backgroundColor: AppColors.blueColor);
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (BuildContext context) => IpqcTestList()));
+      }
+    } else {
+      Toast.show("Error In Server",
+          duration: Toast.lengthLong, gravity: Toast.center);
+    }
+  }
+
+  Future setApprovalStatuss(prelamId) async {
+    setState(() {
+      _isLoading = true;
+    });
+    FocusScope.of(context).unfocus();
+    final url = ("${site!}IPQC/UpdatePreLamStatus");
+
+    var params = {
+      "Type": "Postlam Baliyali",
+      "token": token,
+      "CurrentUser": personid,
+      "ApprovalStatus": "Pending",
+      "JobCardDetailId": prelamId ?? ""
+    };
+
+    var response = await http.post(
+      Uri.parse(url),
+      body: json.encode(params),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        _isLoading = false;
+      });
+      var objData = json.decode(response.body);
+      if (objData['success'] == false) {
+        Toast.show("Please Try Again.",
+            duration: Toast.lengthLong,
+            gravity: Toast.center,
+            backgroundColor: AppColors.redColor);
+      } else {
+        Toast.show("Post Lam Baliyali Test Complete .",
             duration: Toast.lengthLong,
             gravity: Toast.center,
             backgroundColor: AppColors.blueColor);
@@ -1486,7 +1700,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
           rfidCellMController.text =
               rfid['Cell & Module Make & Manufacturing Month Verification'] ??
                   '';
-          rfidRemarkController.text = rfid['RFIDRemark'] ?? '';
+          rfidRemarkController.text = resBody['response']['RFIDRemark'] ?? '';
 
           // Final Visual Inspection
           final finalV =
@@ -1503,7 +1717,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
           finalBack5Controller.text = finalV['Backlabel5'] ?? '';
 
           finalRemarkController.text =
-              rfid['FinalVisualInspectionRemark'] ?? '';
+              resBody['response']['FinalVisualInspectionRemark'] ?? '';
 
           // Dimension Measurement
           final dimensionData =
@@ -1525,6 +1739,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
           packWPController.text = packaging['Wooden Pallet dimension'] ?? '';
           packRemarkController.text =
               resBody['response']['PackagingRemark'] ?? '';
+          referencePdfController.text = resBody['response']['PreLamPdf'] ?? '';
 
           // Continue with other sections following the same pattern...
 
@@ -1553,6 +1768,8 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
   }
 
   void _updateImageControllers() {
+    print("_capturedImages");
+    print(_capturedImages);
     for (var image in _capturedImages) {
       switch (image.imageKey) {
         case 'AutoEdge_Image1':
@@ -1572,19 +1789,19 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
           autotrimCam5Controller.text = image.imagePath ?? '';
           break;
 
-        case '90°_Visual_inspection_Image1':
+        case '90_Visual_inspection_Image1':
           _90visCam1Controller.text = image.imagePath ?? '';
           break;
-        case '90°_Visual_inspection_Image2':
+        case '90_Visual_inspection_Image2':
           _90visCam2Controller.text = image.imagePath ?? '';
           break;
-        case '90°_Visual_inspection_Image3':
+        case '90_Visual_inspection_Image3':
           _90visCam3Controller.text = image.imagePath ?? '';
           break;
-        case '90°_Visual_inspection_Image4':
+        case '90_Visual_inspection_Image4':
           _90visCam4Controller.text = image.imagePath ?? '';
           break;
-        case '90°_Visual_inspection_Image5':
+        case '90_Visual_inspection_Image5':
           _90visCam5Controller.text = image.imagePath ?? '';
           break;
 
@@ -1619,19 +1836,19 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
           hipDCWCam5Controller.text = image.imagePath ?? '';
           break;
         case 'IR_Image1':
-          hipIR1Controller.text = image.imagePath ?? '';
+          hipIRCam1Controller.text = image.imagePath ?? '';
           break;
         case 'IR_Image2':
-          hipIR2Controller.text = image.imagePath ?? '';
+          hipIRCam2Controller.text = image.imagePath ?? '';
           break;
         case 'IR_Image3':
-          hipIR3Controller.text = image.imagePath ?? '';
+          hipIRCam3Controller.text = image.imagePath ?? '';
           break;
         case 'IR_Image4':
-          hipIR4Controller.text = image.imagePath ?? '';
+          hipIRCam4Controller.text = image.imagePath ?? '';
           break;
         case 'IR_Image5':
-          hipIR5Controller.text = image.imagePath ?? '';
+          hipIRCam5Controller.text = image.imagePath ?? '';
           break;
         case 'Ground_Continuity_Image1':
           hipGCCam1Controller.text = image.imagePath ?? '';
@@ -1712,51 +1929,51 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
     }
   }
 
-  uploadPDF(List<int> referenceBytes) async {
-    setState(() {
-      _isLoading = true;
-    });
-    final prefs = await SharedPreferences.getInstance();
-    site = prefs.getString('site')!;
+  // uploadPDF(List<int> referenceBytes) async {
+  //   setState(() {
+  //     _isLoading = true;
+  //   });
+  //   final prefs = await SharedPreferences.getInstance();
+  //   site = prefs.getString('site')!;
 
-    var currentdate = DateTime.now().microsecondsSinceEpoch;
-    var formData = FormData.fromMap({
-      "JobCardDetailId": prelamId,
-      "PreLamPdf": MultipartFile.fromBytes(
-        referenceBytes,
-        filename: ('${referencePdfController.text}$currentdate.pdf'),
-        contentType: MediaType("application", 'pdf'),
-      ),
-    });
-    _response = await _dio.post(('${site!}IPQC/UploadPreLamPdf'), // Prod
+  //   var currentdate = DateTime.now().microsecondsSinceEpoch;
+  //   var formData = FormData.fromMap({
+  //     "JobCardDetailId": prelamId,
+  //     "PreLamPdf": MultipartFile.fromBytes(
+  //       referenceBytes,
+  //       filename: ('${referencePdfController.text}$currentdate.pdf'),
+  //       contentType: MediaType("application", 'pdf'),
+  //     ),
+  //   });
+  //   _response = await _dio.post(('${site!}IPQC/UploadPreLamPdf'), // Prod
 
-        options: Options(
-          contentType: 'multipart/form-data',
-          followRedirects: false,
-          validateStatus: (status) => true,
-        ),
-        data: formData);
+  //       options: Options(
+  //         contentType: 'multipart/form-data',
+  //         followRedirects: false,
+  //         validateStatus: (status) => true,
+  //       ),
+  //       data: formData);
 
-    try {
-      if (_response?.statusCode == 200) {
-        setState(() {
-          _isLoading = false;
-        });
+  //   try {
+  //     if (_response?.statusCode == 200) {
+  //       setState(() {
+  //         _isLoading = false;
+  //       });
 
-        Toast.show("Post Lam Test Completed.",
-            duration: Toast.lengthLong,
-            gravity: Toast.center,
-            backgroundColor: AppColors.blueColor);
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (BuildContext context) => IpqcTestList()));
-      } else {
-        Toast.show("Error In Server",
-            duration: Toast.lengthLong, gravity: Toast.center);
-      }
-    } catch (err) {
-      print("Error");
-    }
-  }
+  //       Toast.show("Post Lam Test Completed.",
+  //           duration: Toast.lengthLong,
+  //           gravity: Toast.center,
+  //           backgroundColor: AppColors.blueColor);
+  //       Navigator.of(context).pushReplacement(MaterialPageRoute(
+  //           builder: (BuildContext context) => IpqcTestList()));
+  //     } else {
+  //       Toast.show("Error In Server",
+  //           duration: Toast.lengthLong, gravity: Toast.center);
+  //     }
+  //   } catch (err) {
+  //     print("Error");
+  //   }
+  // }
 
   Widget _getFAB() {
     return Padding(
@@ -1915,7 +2132,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                           width: 8,
                                         ),
                                         Text(
-                                          'Ver.1.0 / 20-08-2024',
+                                          'Ver 1.0/01.12.2024',
                                           style: AppStyles
                                               .textfieldCaptionTextStyle,
                                         ),
@@ -1933,53 +2150,52 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                       height: 4,
                                     ),
                                     TextFormField(
-                                      controller: dateController,
-                                      keyboardType: TextInputType.text,
-                                      textInputAction: TextInputAction.next,
-                                      decoration: AppStyles
-                                          .textFieldInputDecoration
-                                          .copyWith(
-                                              hintText: "Please Enter Date",
-                                              counterText: '',
-                                              fillColor: Color.fromARGB(
-                                                  255, 215, 243, 207),
-                                              suffixIcon: Image.asset(
-                                                AppAssets.icCalenderBlue,
-                                                color: AppColors.primaryColor,
-                                              )),
-                                      style: AppStyles.textInputTextStyle,
-                                      readOnly: status == 'Pending' &&
-                                              designation != "QC"
-                                          ? true
-                                          : false,
-                                      onTap: () async {
-                                        if (status != 'Pending') {
-                                          DateTime date = DateTime(2021);
-                                          FocusScope.of(context)
-                                              .requestFocus(FocusNode());
-                                          date = (await showDatePicker(
-                                              context: context,
-                                              initialDate: DateTime.now(),
-                                              firstDate: DateTime(2024),
-                                              lastDate: DateTime.now()))!;
-                                          dateController.text =
-                                              DateFormat("EEE MMM dd, yyyy")
-                                                  .format(DateTime.parse(
-                                                      date.toString()));
-                                          setState(() {
-                                            dateOfPostLam =
-                                                DateFormat("yyyy-MM-dd").format(
-                                              DateTime.parse(date.toString()),
-                                            );
-                                          });
-                                        }
-                                      },
-                                      // validator: MultiValidator([
-                                      //   RequiredValidator(
-                                      //       errorText: "Please Enter Date")
-                                      // ]
-                                      // )
-                                    ),
+                                        controller: dateController,
+                                        keyboardType: TextInputType.text,
+                                        textInputAction: TextInputAction.next,
+                                        decoration: AppStyles
+                                            .textFieldInputDecoration
+                                            .copyWith(
+                                                hintText: "Please Enter Date",
+                                                counterText: '',
+                                                fillColor: Color.fromARGB(
+                                                    255, 215, 243, 207),
+                                                suffixIcon: Image.asset(
+                                                  AppAssets.icCalenderBlue,
+                                                  color: AppColors.primaryColor,
+                                                )),
+                                        style: AppStyles.textInputTextStyle,
+                                        readOnly: status == 'Pending' &&
+                                                designation != "QC"
+                                            ? true
+                                            : false,
+                                        onTap: () async {
+                                          if (status != 'Pending') {
+                                            DateTime date = DateTime(2021);
+                                            FocusScope.of(context)
+                                                .requestFocus(FocusNode());
+                                            date = (await showDatePicker(
+                                                context: context,
+                                                initialDate: DateTime.now(),
+                                                firstDate: DateTime(2024),
+                                                lastDate: DateTime.now()))!;
+                                            dateController.text =
+                                                DateFormat("EEE MMM dd, yyyy")
+                                                    .format(DateTime.parse(
+                                                        date.toString()));
+                                            setState(() {
+                                              dateOfPostLam =
+                                                  DateFormat("yyyy-MM-dd")
+                                                      .format(
+                                                DateTime.parse(date.toString()),
+                                              );
+                                            });
+                                          }
+                                        },
+                                        validator: MultiValidator([
+                                          RequiredValidator(
+                                              errorText: "Please Enter Date")
+                                        ])),
                                     const SizedBox(
                                       height: 15,
                                     ),
@@ -2055,13 +2271,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                               designation != "QC"
                                           ? true
                                           : false,
-                                      // validator: MultiValidator(
-                                      //   [
-                                      //     RequiredValidator(
-                                      //       errorText: "Please Enter Line",
-                                      //     ),
-                                      //   ],
-                                      // ),
+                                      validator: MultiValidator(
+                                        [
+                                          RequiredValidator(
+                                            errorText: "Please Enter Line",
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                     const SizedBox(
                                       height: 15,
@@ -2090,13 +2306,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                               designation != "QC"
                                           ? true
                                           : false,
-                                      // validator: MultiValidator(
-                                      //   [
-                                      //     RequiredValidator(
-                                      //       errorText: "Please Enter Po.No",
-                                      //     ),
-                                      //   ],
-                                      // ),
+                                      validator: MultiValidator(
+                                        [
+                                          RequiredValidator(
+                                            errorText: "Please Enter Po.No",
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                     const SizedBox(
                                       height: 15,
@@ -2166,17 +2382,17 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                               designation != "QC"
                                           ? true
                                           : false,
-                                      // validator: MultiValidator(
-                                      //   [
-                                      //     RequiredValidator(
-                                      //       errorText:
-                                      //           "Please Enter Avaibility of Wi",
-                                      //     ),
-                                      //   ],
-                                      // ),
+                                      validator: MultiValidator(
+                                        [
+                                          RequiredValidator(
+                                            errorText:
+                                                "Please Enter Trimming Quality",
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                     SizedBox(
-                                      height: 5,
+                                      height: 10,
                                     ),
                                     Text(
                                       "Picture Trimming Quality 1",
@@ -2210,13 +2426,20 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                         border: const OutlineInputBorder(),
                                       ),
                                       readOnly: true,
+                                      validator: MultiValidator(
+                                        [
+                                          RequiredValidator(
+                                            errorText: "Please Click Picture ",
+                                          ),
+                                        ],
+                                      ),
                                       enabled: !(widget.id != null &&
                                           widget.id != '' &&
                                           autotrimCam1Controller.text
                                               .isNotEmpty), // Disable the entire field if conditions are met
                                     ),
                                     SizedBox(
-                                      height: 5,
+                                      height: 10,
                                     ),
                                     TextFormField(
                                       controller: trimQuality2Controller,
@@ -2236,17 +2459,17 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                               designation != "QC"
                                           ? true
                                           : false,
-                                      // validator: MultiValidator(
-                                      //   [
-                                      //     RequiredValidator(
-                                      //       errorText:
-                                      //           "Please Enter Avaibility of Wi",
-                                      //     ),
-                                      //   ],
-                                      // ),
+                                      validator: MultiValidator(
+                                        [
+                                          RequiredValidator(
+                                            errorText:
+                                                "Please Enter Trimming Quality",
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                     SizedBox(
-                                      height: 5,
+                                      height: 10,
                                     ),
                                     Text(
                                       "Picture Trimming Quality 2",
@@ -2280,13 +2503,20 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                         border: const OutlineInputBorder(),
                                       ),
                                       readOnly: true,
+                                      validator: MultiValidator(
+                                        [
+                                          RequiredValidator(
+                                            errorText: "Please Click Picture ",
+                                          ),
+                                        ],
+                                      ),
                                       enabled: !(widget.id != null &&
                                           widget.id != '' &&
                                           autotrimCam2Controller
                                               .text.isNotEmpty),
                                     ),
                                     SizedBox(
-                                      height: 5,
+                                      height: 10,
                                     ),
                                     TextFormField(
                                       controller: trimQuality3Controller,
@@ -2306,17 +2536,17 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                               designation != "QC"
                                           ? true
                                           : false,
-                                      // validator: MultiValidator(
-                                      //   [
-                                      //     RequiredValidator(
-                                      //       errorText:
-                                      //           "Please Enter Avaibility of Wi",
-                                      //     ),
-                                      //   ],
-                                      // ),
+                                      validator: MultiValidator(
+                                        [
+                                          RequiredValidator(
+                                            errorText:
+                                                "Please Enter Trimming Quality",
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                     SizedBox(
-                                      height: 5,
+                                      height: 10,
                                     ),
                                     Text(
                                       "Picture Trimming Quality 3",
@@ -2350,13 +2580,20 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                         border: const OutlineInputBorder(),
                                       ),
                                       readOnly: true,
+                                      validator: MultiValidator(
+                                        [
+                                          RequiredValidator(
+                                            errorText: "Please Click Picture ",
+                                          ),
+                                        ],
+                                      ),
                                       enabled: !(widget.id != null &&
                                           widget.id != '' &&
                                           autotrimCam3Controller
                                               .text.isNotEmpty),
                                     ),
                                     SizedBox(
-                                      height: 5,
+                                      height: 10,
                                     ),
                                     TextFormField(
                                       controller: trimQuality4Controller,
@@ -2376,17 +2613,17 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                               designation != "QC"
                                           ? true
                                           : false,
-                                      // validator: MultiValidator(
-                                      //   [
-                                      //     RequiredValidator(
-                                      //       errorText:
-                                      //           "Please Enter Avaibility of Wi",
-                                      //     ),
-                                      //   ],
-                                      // ),
+                                      validator: MultiValidator(
+                                        [
+                                          RequiredValidator(
+                                            errorText:
+                                                "Please Enter Trimming Quality",
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                     SizedBox(
-                                      height: 5,
+                                      height: 10,
                                     ),
                                     Text(
                                       "Picture Trimming Quality 4",
@@ -2420,13 +2657,20 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                         border: const OutlineInputBorder(),
                                       ),
                                       readOnly: true,
+                                      validator: MultiValidator(
+                                        [
+                                          RequiredValidator(
+                                            errorText: "Please Click Picture ",
+                                          ),
+                                        ],
+                                      ),
                                       enabled: !(widget.id != null &&
                                           widget.id != '' &&
                                           autotrimCam4Controller
                                               .text.isNotEmpty),
                                     ),
                                     SizedBox(
-                                      height: 5,
+                                      height: 10,
                                     ),
                                     TextFormField(
                                       controller: trimQuality5Controller,
@@ -2446,17 +2690,17 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                               designation != "QC"
                                           ? true
                                           : false,
-                                      // validator: MultiValidator(
-                                      //   [
-                                      //     RequiredValidator(
-                                      //       errorText:
-                                      //           "Please Enter Avaibility of Wi",
-                                      //     ),
-                                      //   ],
-                                      // ),
+                                      validator: MultiValidator(
+                                        [
+                                          RequiredValidator(
+                                            errorText:
+                                                "Please Enter Trimming Quality",
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                     const SizedBox(
-                                      height: 5,
+                                      height: 10,
                                     ),
                                     Text(
                                       "Picture Trimming Quality 5",
@@ -2490,13 +2734,20 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                         border: const OutlineInputBorder(),
                                       ),
                                       readOnly: true,
+                                      validator: MultiValidator(
+                                        [
+                                          RequiredValidator(
+                                            errorText: "Please Click Picture ",
+                                          ),
+                                        ],
+                                      ),
                                       enabled: !(widget.id != null &&
                                           widget.id != '' &&
                                           autotrimCam5Controller
                                               .text.isNotEmpty),
                                     ),
                                     SizedBox(
-                                      height: 5,
+                                      height: 10,
                                     ),
                                     const SizedBox(
                                       height: 15,
@@ -2586,14 +2837,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                               designation != "QC"
                                           ? true
                                           : false,
-                                      // validator: MultiValidator(
-                                      //   [
-                                      //     RequiredValidator(
-                                      //       errorText:
-                                      //           "Please Enter Avaibility of Wi",
-                                      //     ),
-                                      //   ],
-                                      // ),
+                                      validator: MultiValidator(
+                                        [
+                                          RequiredValidator(
+                                            errorText:
+                                                "Please Enter Trimming Blade life cycle",
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                     const SizedBox(
                                       height: 15,
@@ -2653,8 +2904,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                       // validator: MultiValidator(
                                       //   [
                                       //     RequiredValidator(
-                                      //       errorText:
-                                      //           "Please Enter Correct data",
+                                      //       errorText: "Please Enter  Remark",
                                       //     ),
                                       //   ],
                                       // ),
@@ -2676,16 +2926,30 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                             ),
                                             onTap: () {
                                               AppHelper.hideKeyboard(context);
-                                              if (status != 'Pending') {
+                                              // if (status != 'Pending') {
+                                              //   setState(() {
+                                              //     sendStatus = 'Inprogress';
+                                              //   });
+                                              //   // createData();
+                                              // }
+                                              _postLamFormKey
+                                                  .currentState!.save;
+                                              if (_postLamFormKey.currentState!
+                                                  .validate()) {
+                                                if (status != 'Pending') {
+                                                  setState(() {
+                                                    sendStatus = 'Inprogress';
+                                                    // setPage =
+                                                    //     'postlamvisualinspection';
+                                                  });
+                                                  createData();
+                                                }
+                                                //  createData();
                                                 setState(() {
-                                                  sendStatus = 'Inprogress';
+                                                  setPage =
+                                                      'postlamvisualinspection';
                                                 });
-                                                createData();
                                               }
-                                              setState(() {
-                                                setPage =
-                                                    'postlamvisualinspection';
-                                              });
                                             },
                                             label: "Next",
                                             organization: '',
@@ -2882,17 +3146,17 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                   designation != "QC"
                                               ? true
                                               : false,
-                                          // validator: MultiValidator(
-                                          //   [
-                                          //     RequiredValidator(
-                                          //       errorText:
-                                          //           "Please Enter Avaibility of Wi & Crieteria",
-                                          //     ),
-                                          //   ],
-                                          // ),
+                                          validator: MultiValidator(
+                                            [
+                                              RequiredValidator(
+                                                errorText:
+                                                    "Please Enter 90° Visual inspection",
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                         SizedBox(
-                                          height: 5,
+                                          height: 10,
                                         ),
                                         Text(
                                           "Picture Visual Inspection 1",
@@ -2913,7 +3177,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                 if (status != 'Pending') {
                                                   await _openCamera(
                                                       _90visCam1Controller,
-                                                      '90°_Visual_inspection_Image1',
+                                                      '90_Visual_inspection_Image1',
                                                       /** image name */
                                                       'Visual Inspection',
                                                       /*** Type  */
@@ -2927,6 +3191,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                             border: const OutlineInputBorder(),
                                           ),
                                           readOnly: true,
+                                          validator: MultiValidator(
+                                            [
+                                              RequiredValidator(
+                                                errorText:
+                                                    "Please Click Picture ",
+                                              ),
+                                            ],
+                                          ),
                                           enabled: !(widget.id != null &&
                                               widget.id != '' &&
                                               _90visCam1Controller
@@ -2953,17 +3225,17 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                   designation != "QC"
                                               ? true
                                               : false,
-                                          // validator: MultiValidator(
-                                          //   [
-                                          //     RequiredValidator(
-                                          //       errorText:
-                                          //           "Please Enter Avaibility of Wi & Crieteria",
-                                          //     ),
-                                          //   ],
-                                          // ),
+                                          validator: MultiValidator(
+                                            [
+                                              RequiredValidator(
+                                                errorText:
+                                                    "Please Enter 90° Visual inspection",
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                         SizedBox(
-                                          height: 5,
+                                          height: 10,
                                         ),
                                         Text(
                                           "Picture Visual Inspection 2",
@@ -2984,7 +3256,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                 if (status != 'Pending') {
                                                   await _openCamera(
                                                       _90visCam2Controller,
-                                                      '90°_Visual_inspection_Image2',
+                                                      '90_Visual_inspection_Image2',
                                                       /** image name */
                                                       'Visual Inspection',
                                                       /*** Type  */
@@ -2998,13 +3270,21 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                             border: const OutlineInputBorder(),
                                           ),
                                           readOnly: true,
+                                          validator: MultiValidator(
+                                            [
+                                              RequiredValidator(
+                                                errorText:
+                                                    "Please Click Picture ",
+                                              ),
+                                            ],
+                                          ),
                                           enabled: !(widget.id != null &&
                                               widget.id != '' &&
                                               _90visCam2Controller
                                                   .text.isNotEmpty),
                                         ),
                                         SizedBox(
-                                          height: 5,
+                                          height: 10,
                                         ),
                                         TextFormField(
                                           controller: _90vis3Controller,
@@ -3024,14 +3304,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                   designation != "QC"
                                               ? true
                                               : false,
-                                          // validator: MultiValidator(
-                                          //   [
-                                          //     RequiredValidator(
-                                          //       errorText:
-                                          //           "Please Enter Avaibility of Wi & Crieteria",
-                                          //     ),
-                                          //   ],
-                                          // ),
+                                          validator: MultiValidator(
+                                            [
+                                              RequiredValidator(
+                                                errorText:
+                                                    "Please Enter 90° Visual inspection",
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                         SizedBox(
                                           height: 5,
@@ -3055,7 +3335,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                 if (status != 'Pending') {
                                                   await _openCamera(
                                                       _90visCam3Controller,
-                                                      '90°_Visual_inspection_Image3',
+                                                      '90_Visual_inspection_Image3',
                                                       /** image name */
                                                       'Visual Inspection',
                                                       /*** Type  */
@@ -3069,6 +3349,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                             border: const OutlineInputBorder(),
                                           ),
                                           readOnly: true,
+                                          validator: MultiValidator(
+                                            [
+                                              RequiredValidator(
+                                                errorText:
+                                                    "Please Click Picture ",
+                                              ),
+                                            ],
+                                          ),
                                           enabled: !(widget.id != null &&
                                               widget.id != '' &&
                                               _90visCam3Controller
@@ -3095,14 +3383,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                   designation != "QC"
                                               ? true
                                               : false,
-                                          // validator: MultiValidator(
-                                          //   [
-                                          //     RequiredValidator(
-                                          //       errorText:
-                                          //           "Please Enter Avaibility of Wi & Crieteria",
-                                          //     ),
-                                          //   ],
-                                          // ),
+                                          validator: MultiValidator(
+                                            [
+                                              RequiredValidator(
+                                                errorText:
+                                                    "Please Enter 90° Visual inspection",
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                         SizedBox(
                                           height: 5,
@@ -3126,7 +3414,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                 if (status != 'Pending') {
                                                   await _openCamera(
                                                       _90visCam4Controller,
-                                                      '90°_Visual_inspection_Image4',
+                                                      '90_Visual_inspection_Image4',
                                                       /** image name */
                                                       'Visual Inspection',
                                                       /*** Type  */
@@ -3140,6 +3428,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                             border: const OutlineInputBorder(),
                                           ),
                                           readOnly: true,
+                                          validator: MultiValidator(
+                                            [
+                                              RequiredValidator(
+                                                errorText:
+                                                    "Please Click Picture ",
+                                              ),
+                                            ],
+                                          ),
                                           enabled: !(widget.id != null &&
                                               widget.id != '' &&
                                               _90visCam4Controller
@@ -3166,14 +3462,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                   designation != "QC"
                                               ? true
                                               : false,
-                                          // validator: MultiValidator(
-                                          //   [
-                                          //     RequiredValidator(
-                                          //       errorText:
-                                          //           "Please Enter Avaibility of Wi & Crieteria",
-                                          //     ),
-                                          //   ],
-                                          // ),
+                                          validator: MultiValidator(
+                                            [
+                                              RequiredValidator(
+                                                errorText:
+                                                    "Please Enter 90° Visual inspection",
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                         SizedBox(
                                           height: 5,
@@ -3197,7 +3493,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                 if (status != 'Pending') {
                                                   await _openCamera(
                                                       _90visCam5Controller,
-                                                      '90°_Visual_inspection_Image5',
+                                                      '90_Visual_inspection_Image5',
                                                       /** image name */
                                                       'Visual Inspection',
                                                       /*** Type  */
@@ -3211,6 +3507,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                             border: const OutlineInputBorder(),
                                           ),
                                           readOnly: true,
+                                          validator: MultiValidator(
+                                            [
+                                              RequiredValidator(
+                                                errorText:
+                                                    "Please Click Picture ",
+                                              ),
+                                            ],
+                                          ),
                                           enabled: !(widget.id != null &&
                                               widget.id != '' &&
                                               _90visCam5Controller
@@ -3285,7 +3589,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                           //   [
                                           //     RequiredValidator(
                                           //       errorText:
-                                          //           "Please Enter Correct data",
+                                          //           "Please Enter  Remark",
                                           //     ),
                                           //   ],
                                           // ),
@@ -3309,17 +3613,30 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                 onTap: () {
                                                   AppHelper.hideKeyboard(
                                                       context);
-                                                  if (status != 'Pending') {
-                                                    setState(() {
-                                                      sendStatus = 'Inprogress';
-                                                    });
-                                                    createData();
-                                                  }
+                                                  // if (status != 'Pending') {
+                                                  //   setState(() {
+                                                  //     sendStatus = 'Inprogress';
+                                                  //   });
+                                                  //   // createData();
+                                                  // }
                                                   _postLamFormKey
                                                       .currentState!.save;
-                                                  setState(() {
-                                                    setPage = "framing";
-                                                  });
+                                                  if (_postLamFormKey
+                                                      .currentState!
+                                                      .validate()) {
+                                                    if (status != 'Pending') {
+                                                      setState(() {
+                                                        sendStatus =
+                                                            'Inprogress';
+                                                        // setPage = "framing";
+                                                      });
+                                                      createData();
+                                                    }
+                                                    // createData();
+                                                    setState(() {
+                                                      setPage = "framing";
+                                                    });
+                                                  }
                                                 },
                                                 label: "Next",
                                                 organization: '',
@@ -3548,14 +3865,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                       designation != "QC"
                                                   ? true
                                                   : false,
-                                              // validator: MultiValidator(
-                                              //   [
-                                              //     RequiredValidator(
-                                              //       errorText:
-                                              //           "Please Enter Obsevation ",
-                                              //     ),
-                                              //   ],
-                                              // ),
+                                              validator: MultiValidator(
+                                                [
+                                                  RequiredValidator(
+                                                    errorText:
+                                                        "Please Enter Glue uniformity & continuity in frame groove ",
+                                                  ),
+                                                ],
+                                              ),
                                             ),
                                             const SizedBox(
                                               height: 15,
@@ -3653,14 +3970,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                       designation != "QC"
                                                   ? true
                                                   : false,
-                                              // validator: MultiValidator(
-                                              //   [
-                                              //     RequiredValidator(
-                                              //       errorText:
-                                              //           "Please Enter Obsevation ",
-                                              //     ),
-                                              //   ],
-                                              // ),
+                                              validator: MultiValidator(
+                                                [
+                                                  RequiredValidator(
+                                                    errorText:
+                                                        "Please Enter Short Side Glue Weight ",
+                                                  ),
+                                                ],
+                                              ),
                                             ),
                                             const SizedBox(
                                               height: 15,
@@ -3757,14 +4074,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                       designation != "QC"
                                                   ? true
                                                   : false,
-                                              // validator: MultiValidator(
-                                              //   [
-                                              //     RequiredValidator(
-                                              //       errorText:
-                                              //           "Please Enter Obsevation ",
-                                              //     ),
-                                              //   ],
-                                              // ),
+                                              validator: MultiValidator(
+                                                [
+                                                  RequiredValidator(
+                                                    errorText:
+                                                        "Please Enter Long Side Glue Weight ",
+                                                  ),
+                                                ],
+                                              ),
                                             ),
                                             const SizedBox(
                                               height: 15,
@@ -3860,14 +4177,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                       designation != "QC"
                                                   ? true
                                                   : false,
-                                              // validator: MultiValidator(
-                                              //   [
-                                              //     RequiredValidator(
-                                              //       errorText:
-                                              //           "Please Enter Obsevation ",
-                                              //     ),
-                                              //   ],
-                                              // ),
+                                              validator: MultiValidator(
+                                                [
+                                                  RequiredValidator(
+                                                    errorText:
+                                                        "Please Enter Anodizing Thickness ",
+                                                  ),
+                                                ],
+                                              ),
                                             ),
                                             const SizedBox(
                                               height: 15,
@@ -3939,7 +4256,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                               //   [
                                               //     RequiredValidator(
                                               //       errorText:
-                                              //           "Please Enter Correct data",
+                                              //           "Please Enter  Remark",
                                               //     ),
                                               //   ],
                                               // ),
@@ -3967,18 +4284,35 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                     onTap: () {
                                                       AppHelper.hideKeyboard(
                                                           context);
-                                                      if (status != 'Pending') {
-                                                        setState(() {
-                                                          sendStatus =
-                                                              'Inprogress';
-                                                        });
-                                                        createData();
-                                                      }
+                                                      // if (status != 'Pending') {
+                                                      //   setState(() {
+                                                      //     sendStatus =
+                                                      //         'Inprogress';
+                                                      //   });
+                                                      //   // createData();
+                                                      // }
                                                       _postLamFormKey
                                                           .currentState!.save;
-                                                      setState(() {
-                                                        setPage = 'junctionbox';
-                                                      });
+                                                      if (_postLamFormKey
+                                                          .currentState!
+                                                          .validate()) {
+                                                        if (status !=
+                                                            'Pending') {
+                                                          setState(() {
+                                                            sendStatus =
+                                                                'Inprogress';
+                                                            // setPage =
+                                                            //     'junctionbox';
+                                                          });
+                                                          createData();
+                                                        }
+                                                        // createData();
+
+                                                        setState(() {
+                                                          setPage =
+                                                              'junctionbox';
+                                                        });
+                                                      }
                                                     },
                                                     label: "Next",
                                                     organization: '',
@@ -4228,14 +4562,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                           designation != "QC"
                                                       ? true
                                                       : false,
-                                                  // validator: MultiValidator(
-                                                  //   [
-                                                  //     RequiredValidator(
-                                                  //       errorText:
-                                                  //           "Please Enter Obsevation ",
-                                                  //     ),
-                                                  //   ],
-                                                  // ),
+                                                  validator: MultiValidator(
+                                                    [
+                                                      RequiredValidator(
+                                                        errorText:
+                                                            "Please Enter Junction Box(Connector Appereance & Cable Length) ",
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
                                                 const SizedBox(
                                                   height: 15,
@@ -4339,14 +4673,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                           designation != "QC"
                                                       ? true
                                                       : false,
-                                                  // validator: MultiValidator(
-                                                  //   [
-                                                  //     RequiredValidator(
-                                                  //       errorText:
-                                                  //           "Please Enter Obsevation ",
-                                                  //     ),
-                                                  //   ],
-                                                  // ),
+                                                  validator: MultiValidator(
+                                                    [
+                                                      RequiredValidator(
+                                                        errorText:
+                                                            "Please Enter Silicon Glue Weight on the bottom (g) ",
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
                                                 const SizedBox(
                                                   height: 15,
@@ -4449,14 +4783,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                           designation != "QC"
                                                       ? true
                                                       : false,
-                                                  // validator: MultiValidator(
-                                                  //   [
-                                                  //     RequiredValidator(
-                                                  //       errorText:
-                                                  //           "Please Enter Obsevation ",
-                                                  //     ),
-                                                  //   ],
-                                                  // ),
+                                                  validator: MultiValidator(
+                                                    [
+                                                      RequiredValidator(
+                                                        errorText:
+                                                            "Please Enter Soldering Iron Temperature ",
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
                                                 const SizedBox(
                                                   height: 15,
@@ -4559,14 +4893,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                           designation != "QC"
                                                       ? true
                                                       : false,
-                                                  // validator: MultiValidator(
-                                                  //   [
-                                                  //     RequiredValidator(
-                                                  //       errorText:
-                                                  //           "Please Enter Obsevation ",
-                                                  //     ),
-                                                  //   ],
-                                                  // ),
+                                                  validator: MultiValidator(
+                                                    [
+                                                      RequiredValidator(
+                                                        errorText:
+                                                            "Please Enter Soldering Quality ",
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
                                                 const SizedBox(
                                                   height: 15,
@@ -4643,7 +4977,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                   //   [
                                                   //     RequiredValidator(
                                                   //       errorText:
-                                                  //           "Please Enter Correct data",
+                                                  //           "Please Enter  Remark",
                                                   //     ),
                                                   //   ],
                                                   // ),
@@ -4675,22 +5009,37 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                           AppHelper
                                                               .hideKeyboard(
                                                                   context);
-                                                          if (status !=
-                                                              'Pending') {
-                                                            setState(() {
-                                                              sendStatus =
-                                                                  'Inprogress';
-                                                            });
-                                                            createData();
-                                                          }
+                                                          // if (status !=
+                                                          //     'Pending') {
+                                                          //   setState(() {
+                                                          //     sendStatus =
+                                                          //         'Inprogress';
+                                                          //   });
+                                                          //   // createData();
+                                                          // }
 
                                                           _postLamFormKey
                                                               .currentState!
                                                               .save;
-                                                          setState(() {
-                                                            setPage =
-                                                                'jbpotting';
-                                                          });
+                                                          if (_postLamFormKey
+                                                              .currentState!
+                                                              .validate()) {
+                                                            if (status !=
+                                                                'Pending') {
+                                                              setState(() {
+                                                                sendStatus =
+                                                                    'Inprogress';
+                                                                // setPage =
+                                                                //     'jbpotting';
+                                                              });
+                                                              createData();
+                                                            }
+                                                            // createData();
+                                                            setState(() {
+                                                              setPage =
+                                                                  'jbpotting';
+                                                            });
+                                                          }
                                                         },
                                                         label: "Next",
                                                         organization: '',
@@ -4951,14 +5300,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                       "QC"
                                                               ? true
                                                               : false,
-                                                      // validator: MultiValidator(
-                                                      //   [
-                                                      //     RequiredValidator(
-                                                      //       errorText:
-                                                      //           "Please Enter Obsevation ",
-                                                      //     ),
-                                                      //   ],
-                                                      // ),
+                                                      validator: MultiValidator(
+                                                        [
+                                                          RequiredValidator(
+                                                            errorText:
+                                                                "Please Enter A/B Glue Ratio ",
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ),
                                                     const SizedBox(
                                                       height: 15,
@@ -5066,14 +5415,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                       "QC"
                                                               ? true
                                                               : false,
-                                                      // validator: MultiValidator(
-                                                      //   [
-                                                      //     RequiredValidator(
-                                                      //       errorText:
-                                                      //           "Please Enter Obsevation ",
-                                                      //     ),
-                                                      //   ],
-                                                      // ),
+                                                      validator: MultiValidator(
+                                                        [
+                                                          RequiredValidator(
+                                                            errorText:
+                                                                "Please Enter  Potting material weight ",
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ),
                                                     const SizedBox(
                                                       height: 15,
@@ -5181,14 +5530,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                       "QC"
                                                               ? true
                                                               : false,
-                                                      // validator: MultiValidator(
-                                                      //   [
-                                                      //     RequiredValidator(
-                                                      //       errorText:
-                                                      //           "Please Enter Obsevation ",
-                                                      //     ),
-                                                      //   ],
-                                                      // ),
+                                                      validator: MultiValidator(
+                                                        [
+                                                          RequiredValidator(
+                                                            errorText:
+                                                                "Please Enter Nozzle Changing ",
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ),
                                                     const SizedBox(
                                                       height: 15,
@@ -5268,7 +5617,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                       //   [
                                                       //     RequiredValidator(
                                                       //       errorText:
-                                                      //           "Please Enter Correct data",
+                                                      //           "Please Enter  Remark",
                                                       //     ),
                                                       //   ],
                                                       // ),
@@ -5301,22 +5650,36 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                               AppHelper
                                                                   .hideKeyboard(
                                                                       context);
-                                                              if (status !=
-                                                                  'Pending') {
-                                                                setState(() {
-                                                                  sendStatus =
-                                                                      'Inprogress';
-                                                                });
-                                                                createData();
-                                                              }
-
+                                                              // if (status !=
+                                                              //     'Pending') {
+                                                              //   setState(() {
+                                                              //     sendStatus =
+                                                              //         'Inprogress';
+                                                              //   });
+                                                              //   // createData();
+                                                              // }
                                                               _postLamFormKey
                                                                   .currentState!
                                                                   .save;
-                                                              setState(() {
-                                                                setPage =
-                                                                    'curing';
-                                                              });
+                                                              if (_postLamFormKey
+                                                                  .currentState!
+                                                                  .validate()) {
+                                                                if (status !=
+                                                                    'Pending') {
+                                                                  setState(() {
+                                                                    sendStatus =
+                                                                        'Inprogress';
+                                                                    // setPage =
+                                                                    //     'curing';
+                                                                  });
+                                                                  createData();
+                                                                }
+                                                                // createData();
+                                                                setState(() {
+                                                                  setPage =
+                                                                      'curing';
+                                                                });
+                                                              }
                                                             },
                                                             label: "Next",
                                                             organization: '',
@@ -5593,14 +5956,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                       "QC"
                                                               ? true
                                                               : false,
-                                                          // validator: MultiValidator(
-                                                          //   [
-                                                          //     RequiredValidator(
-                                                          //       errorText:
-                                                          //           "Please Enter Obsevation ",
-                                                          //     ),
-                                                          //   ],
-                                                          // ),
+                                                          validator:
+                                                              MultiValidator(
+                                                            [
+                                                              RequiredValidator(
+                                                                errorText:
+                                                                    "Please Enter Temperature ",
+                                                              ),
+                                                            ],
+                                                          ),
                                                         ),
                                                         const SizedBox(
                                                           height: 15,
@@ -5715,14 +6079,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                       "QC"
                                                               ? true
                                                               : false,
-                                                          // validator: MultiValidator(
-                                                          //   [
-                                                          //     RequiredValidator(
-                                                          //       errorText:
-                                                          //           "Please Enter Obsevation ",
-                                                          //     ),
-                                                          //   ],
-                                                          // ),
+                                                          validator:
+                                                              MultiValidator(
+                                                            [
+                                                              RequiredValidator(
+                                                                errorText:
+                                                                    "Please Enter Humidity ",
+                                                              ),
+                                                            ],
+                                                          ),
                                                         ),
                                                         const SizedBox(
                                                           height: 15,
@@ -5840,14 +6205,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                       "QC"
                                                               ? true
                                                               : false,
-                                                          // validator: MultiValidator(
-                                                          //   [
-                                                          //     RequiredValidator(
-                                                          //       errorText:
-                                                          //           "Please Enter Obsevation ",
-                                                          //     ),
-                                                          //   ],
-                                                          // ),
+                                                          validator:
+                                                              MultiValidator(
+                                                            [
+                                                              RequiredValidator(
+                                                                errorText:
+                                                                    "Please Enter Curing Time(h) ",
+                                                              ),
+                                                            ],
+                                                          ),
                                                         ),
                                                         const SizedBox(
                                                           height: 15,
@@ -5931,11 +6297,12 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                       "QC"
                                                               ? true
                                                               : false,
-                                                          // validator: MultiValidator(
+                                                          // validator:
+                                                          //     MultiValidator(
                                                           //   [
                                                           //     RequiredValidator(
                                                           //       errorText:
-                                                          //           "Please Enter Correct data",
+                                                          //           "Please Enter  Remark",
                                                           //     ),
                                                           //   ],
                                                           // ),
@@ -5969,23 +6336,40 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                   AppHelper
                                                                       .hideKeyboard(
                                                                           context);
-                                                                  if (status !=
-                                                                      'Pending') {
-                                                                    setState(
-                                                                        () {
-                                                                      sendStatus =
-                                                                          'Inprogress';
-                                                                    });
-                                                                    createData();
-                                                                  }
+                                                                  // if (status !=
+                                                                  //     'Pending') {
+                                                                  //   setState(
+                                                                  //       () {
+                                                                  //     sendStatus =
+                                                                  //         'Inprogress';
+                                                                  //   });
+                                                                  //   // createData();
+                                                                  // }
 
                                                                   _postLamFormKey
                                                                       .currentState!
                                                                       .save;
-                                                                  setState(() {
-                                                                    setPage =
-                                                                        'buffing';
-                                                                  });
+                                                                  if (_postLamFormKey
+                                                                      .currentState!
+                                                                      .validate()) {
+                                                                    if (status !=
+                                                                        'Pending') {
+                                                                      setState(
+                                                                          () {
+                                                                        sendStatus =
+                                                                            'Inprogress';
+                                                                        // setPage =
+                                                                        //     'buffing';
+                                                                      });
+                                                                      createData();
+                                                                    }
+                                                                    // createData();
+                                                                    setState(
+                                                                        () {
+                                                                      setPage =
+                                                                          'buffing';
+                                                                    });
+                                                                  }
                                                                 },
                                                                 label: "Next",
                                                                 organization:
@@ -6226,7 +6610,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                               height: 15,
                                                             ),
                                                             Text(
-                                                              "Corner Edge,Buffing belt condition",
+                                                              "Corner Edge,Buffing belt condition With Serial No",
                                                               style: AppStyles
                                                                   .textfieldCaptionTextStyle,
                                                             ),
@@ -6263,15 +6647,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           "QC"
                                                                   ? true
                                                                   : false,
-                                                              // validator:
-                                                              //     MultiValidator(
-                                                              //   [
-                                                              //     RequiredValidator(
-                                                              //       errorText:
-                                                              //           "Please Enter Obsevation ",
-                                                              //     ),
-                                                              //   ],
-                                                              // ),
+                                                              validator:
+                                                                  MultiValidator(
+                                                                [
+                                                                  RequiredValidator(
+                                                                    errorText:
+                                                                        "Please Enter Corner Edge,Buffing belt condition ",
+                                                                  ),
+                                                                ],
+                                                              ),
                                                             ),
                                                             SizedBox(
                                                               height: 5,
@@ -6306,15 +6690,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           "QC"
                                                                   ? true
                                                                   : false,
-                                                              // validator:
-                                                              //     MultiValidator(
-                                                              //   [
-                                                              //     RequiredValidator(
-                                                              //       errorText:
-                                                              //           "Please Enter Obsevation ",
-                                                              //     ),
-                                                              //   ],
-                                                              // ),
+                                                              validator:
+                                                                  MultiValidator(
+                                                                [
+                                                                  RequiredValidator(
+                                                                    errorText:
+                                                                        "Please Enter Corner Edge,Buffing belt condition ",
+                                                                  ),
+                                                                ],
+                                                              ),
                                                             ),
                                                             SizedBox(
                                                               height: 5,
@@ -6349,15 +6733,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           "QC"
                                                                   ? true
                                                                   : false,
-                                                              // validator:
-                                                              //     MultiValidator(
-                                                              //   [
-                                                              //     RequiredValidator(
-                                                              //       errorText:
-                                                              //           "Please Enter Obsevation ",
-                                                              //     ),
-                                                              //   ],
-                                                              // ),
+                                                              validator:
+                                                                  MultiValidator(
+                                                                [
+                                                                  RequiredValidator(
+                                                                    errorText:
+                                                                        "Please Enter Corner Edge,Buffing belt condition ",
+                                                                  ),
+                                                                ],
+                                                              ),
                                                             ),
                                                             SizedBox(
                                                               height: 5,
@@ -6392,15 +6776,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           "QC"
                                                                   ? true
                                                                   : false,
-                                                              // validator:
-                                                              //     MultiValidator(
-                                                              //   [
-                                                              //     RequiredValidator(
-                                                              //       errorText:
-                                                              //           "Please Enter Obsevation ",
-                                                              //     ),
-                                                              //   ],
-                                                              // ),
+                                                              validator:
+                                                                  MultiValidator(
+                                                                [
+                                                                  RequiredValidator(
+                                                                    errorText:
+                                                                        "Please Enter Corner Edge,Buffing belt condition ",
+                                                                  ),
+                                                                ],
+                                                              ),
                                                             ),
                                                             SizedBox(
                                                               height: 5,
@@ -6435,15 +6819,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           "QC"
                                                                   ? true
                                                                   : false,
-                                                              // validator:
-                                                              //     MultiValidator(
-                                                              //   [
-                                                              //     RequiredValidator(
-                                                              //       errorText:
-                                                              //           "Please Enter Obsevation ",
-                                                              //     ),
-                                                              //   ],
-                                                              // ),
+                                                              validator:
+                                                                  MultiValidator(
+                                                                [
+                                                                  RequiredValidator(
+                                                                    errorText:
+                                                                        "Please Enter Corner Edge,Buffing belt condition ",
+                                                                  ),
+                                                                ],
+                                                              ),
                                                             ),
                                                             const SizedBox(
                                                               height: 15,
@@ -6532,11 +6916,12 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           "QC"
                                                                   ? true
                                                                   : false,
-                                                              // validator: MultiValidator(
+                                                              // validator:
+                                                              //     MultiValidator(
                                                               //   [
                                                               //     RequiredValidator(
                                                               //       errorText:
-                                                              //           "Please Enter Correct data",
+                                                              //           "Please Enter  Remark",
                                                               //     ),
                                                               //   ],
                                                               // ),
@@ -6573,24 +6958,40 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                       AppHelper
                                                                           .hideKeyboard(
                                                                               context);
-                                                                      if (status !=
-                                                                          'Pending') {
-                                                                        setState(
-                                                                            () {
-                                                                          sendStatus =
-                                                                              'Inprogress';
-                                                                        });
-                                                                        createData();
-                                                                      }
+                                                                      // if (status !=
+                                                                      //     'Pending') {
+                                                                      //   setState(
+                                                                      //       () {
+                                                                      //     sendStatus =
+                                                                      //         'Inprogress';
+                                                                      //   });
+                                                                      //   // createData();
+                                                                      // }
 
                                                                       _postLamFormKey
                                                                           .currentState!
                                                                           .save;
-                                                                      setState(
-                                                                          () {
-                                                                        setPage =
-                                                                            'cleaning';
-                                                                      });
+                                                                      if (_postLamFormKey
+                                                                          .currentState!
+                                                                          .validate()) {
+                                                                        if (status !=
+                                                                            'Pending') {
+                                                                          setState(
+                                                                              () {
+                                                                            sendStatus =
+                                                                                'Inprogress';
+                                                                            // setPage =
+                                                                            //     'cleaning';
+                                                                          });
+                                                                          createData();
+                                                                        }
+                                                                        // createData();
+                                                                        setState(
+                                                                            () {
+                                                                          setPage =
+                                                                              'cleaning';
+                                                                        });
+                                                                      }
                                                                     },
                                                                     label:
                                                                         "Next",
@@ -6877,15 +7278,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               "QC"
                                                                       ? true
                                                                       : false,
-                                                                  // validator:
-                                                                  //     MultiValidator(
-                                                                  //   [
-                                                                  //     RequiredValidator(
-                                                                  //       errorText:
-                                                                  //           "Please Enter Obsevation ",
-                                                                  //     ),
-                                                                  //   ],
-                                                                  // ),
+                                                                  validator:
+                                                                      MultiValidator(
+                                                                    [
+                                                                      RequiredValidator(
+                                                                        errorText:
+                                                                            "Please Enter  Module should be free from Tape,Dust,Dirt,EVA/Backsheet residue,Corner Burrs,Glue residue on (glass,backsheet,JB,Wire etc.) ",
+                                                                      ),
+                                                                    ],
+                                                                  ),
                                                                 ),
                                                                 SizedBox(
                                                                   height: 5,
@@ -6937,6 +7338,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                   ),
                                                                   readOnly:
                                                                       true,
+                                                                  validator:
+                                                                      MultiValidator(
+                                                                    [
+                                                                      RequiredValidator(
+                                                                        errorText:
+                                                                            "Please Click Picture ",
+                                                                      ),
+                                                                    ],
+                                                                  ),
                                                                   enabled: !(widget
                                                                               .id !=
                                                                           null &&
@@ -6980,15 +7390,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               "QC"
                                                                       ? true
                                                                       : false,
-                                                                  // validator:
-                                                                  //     MultiValidator(
-                                                                  //   [
-                                                                  //     RequiredValidator(
-                                                                  //       errorText:
-                                                                  //           "Please Enter Obsevation ",
-                                                                  //     ),
-                                                                  //   ],
-                                                                  // ),
+                                                                  validator:
+                                                                      MultiValidator(
+                                                                    [
+                                                                      RequiredValidator(
+                                                                        errorText:
+                                                                            "Please Enter  Module should be free from Tape,Dust,Dirt,EVA/Backsheet residue,Corner Burrs,Glue residue on (glass,backsheet,JB,Wire etc.) ",
+                                                                      ),
+                                                                    ],
+                                                                  ),
                                                                 ),
                                                                 SizedBox(
                                                                   height: 5,
@@ -7040,6 +7450,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                   ),
                                                                   readOnly:
                                                                       true,
+                                                                  validator:
+                                                                      MultiValidator(
+                                                                    [
+                                                                      RequiredValidator(
+                                                                        errorText:
+                                                                            "Please Click Picture ",
+                                                                      ),
+                                                                    ],
+                                                                  ),
                                                                   enabled: !(widget
                                                                               .id !=
                                                                           null &&
@@ -7083,15 +7502,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               "QC"
                                                                       ? true
                                                                       : false,
-                                                                  // validator:
-                                                                  //     MultiValidator(
-                                                                  //   [
-                                                                  //     RequiredValidator(
-                                                                  //       errorText:
-                                                                  //           "Please Enter Obsevation ",
-                                                                  //     ),
-                                                                  //   ],
-                                                                  // ),
+                                                                  validator:
+                                                                      MultiValidator(
+                                                                    [
+                                                                      RequiredValidator(
+                                                                        errorText:
+                                                                            "Please Enter  Module should be free from Tape,Dust,Dirt,EVA/Backsheet residue,Corner Burrs,Glue residue on (glass,backsheet,JB,Wire etc.) ",
+                                                                      ),
+                                                                    ],
+                                                                  ),
                                                                 ),
                                                                 SizedBox(
                                                                   height: 5,
@@ -7143,6 +7562,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                   ),
                                                                   readOnly:
                                                                       true,
+                                                                  validator:
+                                                                      MultiValidator(
+                                                                    [
+                                                                      RequiredValidator(
+                                                                        errorText:
+                                                                            "Please Click Picture ",
+                                                                      ),
+                                                                    ],
+                                                                  ),
                                                                   enabled: !(widget
                                                                               .id !=
                                                                           null &&
@@ -7186,15 +7614,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               "QC"
                                                                       ? true
                                                                       : false,
-                                                                  // validator:
-                                                                  //     MultiValidator(
-                                                                  //   [
-                                                                  //     RequiredValidator(
-                                                                  //       errorText:
-                                                                  //           "Please Enter Obsevation ",
-                                                                  //     ),
-                                                                  //   ],
-                                                                  // ),
+                                                                  validator:
+                                                                      MultiValidator(
+                                                                    [
+                                                                      RequiredValidator(
+                                                                        errorText:
+                                                                            "Please Enter  Module should be free from Tape,Dust,Dirt,EVA/Backsheet residue,Corner Burrs,Glue residue on (glass,backsheet,JB,Wire etc.) ",
+                                                                      ),
+                                                                    ],
+                                                                  ),
                                                                 ),
                                                                 SizedBox(
                                                                   height: 5,
@@ -7249,6 +7677,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                   ),
                                                                   readOnly:
                                                                       true,
+                                                                  validator:
+                                                                      MultiValidator(
+                                                                    [
+                                                                      RequiredValidator(
+                                                                        errorText:
+                                                                            "Please Click Picture ",
+                                                                      ),
+                                                                    ],
+                                                                  ),
                                                                   enabled: !(widget
                                                                               .id !=
                                                                           null &&
@@ -7292,15 +7729,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               "QC"
                                                                       ? true
                                                                       : false,
-                                                                  // validator:
-                                                                  //     MultiValidator(
-                                                                  //   [
-                                                                  //     RequiredValidator(
-                                                                  //       errorText:
-                                                                  //           "Please Enter Obsevation ",
-                                                                  //     ),
-                                                                  //   ],
-                                                                  // ),
+                                                                  validator:
+                                                                      MultiValidator(
+                                                                    [
+                                                                      RequiredValidator(
+                                                                        errorText:
+                                                                            "Please Enter  Module should be free from Tape,Dust,Dirt,EVA/Backsheet residue,Corner Burrs,Glue residue on (glass,backsheet,JB,Wire etc.) ",
+                                                                      ),
+                                                                    ],
+                                                                  ),
                                                                 ),
                                                                 const SizedBox(
                                                                   height: 5,
@@ -7352,6 +7789,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                   ),
                                                                   readOnly:
                                                                       true,
+                                                                  validator:
+                                                                      MultiValidator(
+                                                                    [
+                                                                      RequiredValidator(
+                                                                        errorText:
+                                                                            "Please Click Picture ",
+                                                                      ),
+                                                                    ],
+                                                                  ),
                                                                   enabled: !(widget
                                                                               .id !=
                                                                           null &&
@@ -7450,11 +7896,12 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               "QC"
                                                                       ? true
                                                                       : false,
-                                                                  // validator: MultiValidator(
+                                                                  // validator:
+                                                                  //     MultiValidator(
                                                                   //   [
                                                                   //     RequiredValidator(
                                                                   //       errorText:
-                                                                  //           "Please Enter Correct data",
+                                                                  //           "Please Enter  Remark",
                                                                   //     ),
                                                                   //   ],
                                                                   // ),
@@ -7487,23 +7934,33 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                             () {
                                                                           AppHelper.hideKeyboard(
                                                                               context);
-                                                                          if (status !=
-                                                                              'Pending') {
-                                                                            setState(() {
-                                                                              sendStatus = 'Inprogress';
-                                                                            });
-                                                                            createData();
-                                                                          }
+                                                                          // if (status !=
+                                                                          //     'Pending') {
+                                                                          //   setState(() {
+                                                                          //     sendStatus = 'Inprogress';
+                                                                          //   });
+                                                                          //   createData();
+                                                                          // }
 
                                                                           _postLamFormKey
                                                                               .currentState!
                                                                               .save;
-
-                                                                          setState(
-                                                                              () {
-                                                                            setPage =
-                                                                                'sunsimulator';
-                                                                          });
+                                                                          if (_postLamFormKey
+                                                                              .currentState!
+                                                                              .validate()) {
+                                                                            if (status !=
+                                                                                'Pending') {
+                                                                              setState(() {
+                                                                                sendStatus = 'Inprogress';
+                                                                                // setPage = 'sunsimulator';
+                                                                              });
+                                                                              createData();
+                                                                            }
+                                                                            // createData();
+                                                                            setState(() {
+                                                                              setPage = 'sunsimulator';
+                                                                            });
+                                                                          }
                                                                         },
                                                                         label:
                                                                             "Next",
@@ -7777,15 +8234,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               designation != "QC"
                                                                           ? true
                                                                           : false,
-                                                                      // validator:
-                                                                      //     MultiValidator(
-                                                                      //   [
-                                                                      //     RequiredValidator(
-                                                                      //       errorText:
-                                                                      //           "Please Enter Obsevation ",
-                                                                      //     ),
-                                                                      //   ],
-                                                                      // ),
+                                                                      validator:
+                                                                          MultiValidator(
+                                                                        [
+                                                                          RequiredValidator(
+                                                                            errorText:
+                                                                                "Please Enter Ambient Temp ",
+                                                                          ),
+                                                                        ],
+                                                                      ),
                                                                     ),
                                                                     const SizedBox(
                                                                       height:
@@ -7912,15 +8369,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               designation != "QC"
                                                                           ? true
                                                                           : false,
-                                                                      // validator:
-                                                                      //     MultiValidator(
-                                                                      //   [
-                                                                      //     RequiredValidator(
-                                                                      //       errorText:
-                                                                      //           "Please Enter Observation ",
-                                                                      //     ),
-                                                                      //   ],
-                                                                      // ),
+                                                                      validator:
+                                                                          MultiValidator(
+                                                                        [
+                                                                          RequiredValidator(
+                                                                            errorText:
+                                                                                "Please Enter  Module Temp ",
+                                                                          ),
+                                                                        ],
+                                                                      ),
                                                                     ),
                                                                     const SizedBox(
                                                                       height:
@@ -8048,15 +8505,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               designation != "QC"
                                                                           ? true
                                                                           : false,
-                                                                      // validator:
-                                                                      //     MultiValidator(
-                                                                      //   [
-                                                                      //     RequiredValidator(
-                                                                      //       errorText:
-                                                                      //           "Please Enter Observation ",
-                                                                      //     ),
-                                                                      //   ],
-                                                                      // ),
+                                                                      validator:
+                                                                          MultiValidator(
+                                                                        [
+                                                                          RequiredValidator(
+                                                                            errorText:
+                                                                                "Please Enter Sunsimulator Calibration ",
+                                                                          ),
+                                                                        ],
+                                                                      ),
                                                                     ),
                                                                     const SizedBox(
                                                                       height: 5,
@@ -8177,15 +8634,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               designation != "QC"
                                                                           ? true
                                                                           : false,
-                                                                      // validator:
-                                                                      //     MultiValidator(
-                                                                      //   [
-                                                                      //     RequiredValidator(
-                                                                      //       errorText:
-                                                                      //           "Please Enter Observation ",
-                                                                      //     ),
-                                                                      //   ],
-                                                                      // ),
+                                                                      validator:
+                                                                          MultiValidator(
+                                                                        [
+                                                                          RequiredValidator(
+                                                                            errorText:
+                                                                                "Please Enter Validation ",
+                                                                          ),
+                                                                        ],
+                                                                      ),
                                                                     ),
                                                                     const SizedBox(
                                                                       height: 5,
@@ -8305,15 +8762,15 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               designation != "QC"
                                                                           ? true
                                                                           : false,
-                                                                      // validator:
-                                                                      //     MultiValidator(
-                                                                      //   [
-                                                                      //     RequiredValidator(
-                                                                      //       errorText:
-                                                                      //           "Please Enter Observation ",
-                                                                      //     ),
-                                                                      //   ],
-                                                                      // ),
+                                                                      validator:
+                                                                          MultiValidator(
+                                                                        [
+                                                                          RequiredValidator(
+                                                                            errorText:
+                                                                                "Please Enter Silver Reference Module EL Check ",
+                                                                          ),
+                                                                        ],
+                                                                      ),
                                                                     ),
                                                                     const SizedBox(
                                                                       height: 5,
@@ -8403,11 +8860,12 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               designation != "QC"
                                                                           ? true
                                                                           : false,
-                                                                      // validator: MultiValidator(
+                                                                      // validator:
+                                                                      //     MultiValidator(
                                                                       //   [
                                                                       //     RequiredValidator(
                                                                       //       errorText:
-                                                                      //           "Please Enter Correct data",
+                                                                      //           "Please Enter  Remark",
                                                                       //     ),
                                                                       //   ],
                                                                       // ),
@@ -8437,18 +8895,27 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                             onTap:
                                                                                 () {
                                                                               AppHelper.hideKeyboard(context);
-                                                                              if (status != 'Pending') {
-                                                                                setState(() {
-                                                                                  sendStatus = 'Inprogress';
-                                                                                });
-                                                                                createData();
-                                                                              }
+                                                                              // if (status != 'Pending') {
+                                                                              //   setState(() {
+                                                                              //     sendStatus = 'Inprogress';
+                                                                              //   });
+                                                                              //   // createData();
+                                                                              // }
 
                                                                               _postLamFormKey.currentState!.save;
-
-                                                                              setState(() {
-                                                                                setPage = 'hipot';
-                                                                              });
+                                                                              if (_postLamFormKey.currentState!.validate()) {
+                                                                                if (status != 'Pending') {
+                                                                                  setState(() {
+                                                                                    sendStatus = 'Inprogress';
+                                                                                    // setPage = 'hipot';
+                                                                                  });
+                                                                                  createData();
+                                                                                }
+                                                                                // createData();
+                                                                                setState(() {
+                                                                                  setPage = 'hipot';
+                                                                                });
+                                                                              }
                                                                             },
                                                                             label:
                                                                                 "Next",
@@ -8690,15 +9157,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           readOnly: status == 'Pending' && designation != "QC"
                                                                               ? true
                                                                               : false,
-                                                                          // validator:
-                                                                          //     MultiValidator(
-                                                                          //   [
-                                                                          //     RequiredValidator(
-                                                                          //       errorText:
-                                                                          //           "Please Enter Obsevation ",
-                                                                          //     ),
-                                                                          //   ],
-                                                                          // ),
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Enter DCW ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                         ),
                                                                         SizedBox(
                                                                           height:
@@ -8731,7 +9197,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       /** image name */
                                                                                       'DCW',
                                                                                       /*** Type  */
-                                                                                      'DCW' /** Stage */
+                                                                                      'Hipot Test' /** Stage */
                                                                                       );
                                                                                 }
                                                                               },
@@ -8742,6 +9208,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           ),
                                                                           readOnly:
                                                                               true,
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Click Picture ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                           enabled: !(widget.id != null &&
                                                                               widget.id != '' &&
                                                                               hipDCWCam1Controller.text.isNotEmpty),
@@ -8775,15 +9249,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           readOnly: status == 'Pending' && designation != "QC"
                                                                               ? true
                                                                               : false,
-                                                                          // validator:
-                                                                          //     MultiValidator(
-                                                                          //   [
-                                                                          //     RequiredValidator(
-                                                                          //       errorText:
-                                                                          //           "Please Enter Obsevation ",
-                                                                          //     ),
-                                                                          //   ],
-                                                                          // ),
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Enter DCW ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                         ),
                                                                         SizedBox(
                                                                           height:
@@ -8816,7 +9289,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       /** image name */
                                                                                       'DCW',
                                                                                       /*** Type  */
-                                                                                      'DCW' /** Stage */
+                                                                                      'Hipot Test' /** Stage */
                                                                                       );
                                                                                 }
                                                                               },
@@ -8827,6 +9300,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           ),
                                                                           readOnly:
                                                                               true,
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Click Picture ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                           enabled: !(widget.id != null &&
                                                                               widget.id != '' &&
                                                                               hipDCWCam2Controller.text.isNotEmpty),
@@ -8860,15 +9341,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           readOnly: status == 'Pending' && designation != "QC"
                                                                               ? true
                                                                               : false,
-                                                                          // validator:
-                                                                          //     MultiValidator(
-                                                                          //   [
-                                                                          //     RequiredValidator(
-                                                                          //       errorText:
-                                                                          //           "Please Enter Obsevation ",
-                                                                          //     ),
-                                                                          //   ],
-                                                                          // ),
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Enter DCW ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                         ),
                                                                         SizedBox(
                                                                           height:
@@ -8901,7 +9381,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       /** image name */
                                                                                       'DCW',
                                                                                       /*** Type  */
-                                                                                      'DCW' /** Stage */
+                                                                                      'Hipot Test' /** Stage */
                                                                                       );
                                                                                 }
                                                                               },
@@ -8912,6 +9392,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           ),
                                                                           readOnly:
                                                                               true,
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Click Picture ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                           enabled: !(widget.id != null &&
                                                                               widget.id != '' &&
                                                                               hipDCWCam3Controller.text.isNotEmpty),
@@ -8945,15 +9433,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           readOnly: status == 'Pending' && designation != "QC"
                                                                               ? true
                                                                               : false,
-                                                                          // validator:
-                                                                          //     MultiValidator(
-                                                                          //   [
-                                                                          //     RequiredValidator(
-                                                                          //       errorText:
-                                                                          //           "Please Enter Obsevation ",
-                                                                          //     ),
-                                                                          //   ],
-                                                                          // ),
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Enter DCW ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                         ),
                                                                         SizedBox(
                                                                           height:
@@ -8986,7 +9473,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       /** image name */
                                                                                       'DCW',
                                                                                       /*** Type  */
-                                                                                      'DCW' /** Stage */
+                                                                                      'Hipot Test' /** Stage */
                                                                                       );
                                                                                 }
                                                                               },
@@ -8997,6 +9484,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           ),
                                                                           readOnly:
                                                                               true,
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Click Picture ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                           enabled: !(widget.id != null &&
                                                                               widget.id != '' &&
                                                                               hipDCWCam4Controller.text.isNotEmpty),
@@ -9030,15 +9525,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           readOnly: status == 'Pending' && designation != "QC"
                                                                               ? true
                                                                               : false,
-                                                                          // validator:
-                                                                          //     MultiValidator(
-                                                                          //   [
-                                                                          //     RequiredValidator(
-                                                                          //       errorText:
-                                                                          //           "Please Enter Obsevation ",
-                                                                          //     ),
-                                                                          //   ],
-                                                                          // ),
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Enter DCW ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                         ),
                                                                         SizedBox(
                                                                           height:
@@ -9071,7 +9565,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       /** image name */
                                                                                       'DCW',
                                                                                       /*** Type  */
-                                                                                      'DCW' /** Stage */
+                                                                                      'Hipot Test' /** Stage */
                                                                                       );
                                                                                 }
                                                                               },
@@ -9082,6 +9576,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           ),
                                                                           readOnly:
                                                                               true,
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Click Picture ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                           enabled: !(widget.id != null &&
                                                                               widget.id != '' &&
                                                                               hipDCWCam5Controller.text.isNotEmpty),
@@ -9211,15 +9713,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           readOnly: status == 'Pending' && designation != "QC"
                                                                               ? true
                                                                               : false,
-                                                                          // validator:
-                                                                          //     MultiValidator(
-                                                                          //   [
-                                                                          //     RequiredValidator(
-                                                                          //       errorText:
-                                                                          //           "Please Enter Obsevation ",
-                                                                          //     ),
-                                                                          //   ],
-                                                                          // ),
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Enter IR ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                         ),
                                                                         SizedBox(
                                                                           height:
@@ -9233,7 +9734,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                         ),
                                                                         TextFormField(
                                                                           controller:
-                                                                              hipIR1Controller,
+                                                                              hipIRCam1Controller,
                                                                           decoration:
                                                                               InputDecoration(
                                                                             hintText:
@@ -9247,12 +9748,12 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               onPressed: () async {
                                                                                 if (status != 'Pending') {
                                                                                   await _openCamera(
-                                                                                      hipIR1Controller,
+                                                                                      hipIRCam1Controller,
                                                                                       'IR_Image1',
                                                                                       /** image name */
                                                                                       'IR',
                                                                                       /*** Type  */
-                                                                                      'IR' /** Stage */
+                                                                                      'Hipot Test' /** Stage */
                                                                                       );
                                                                                 }
                                                                               },
@@ -9263,9 +9764,17 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           ),
                                                                           readOnly:
                                                                               true,
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Click Picture ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                           enabled: !(widget.id != null &&
                                                                               widget.id != '' &&
-                                                                              hipIR1Controller.text.isNotEmpty),
+                                                                              hipIRCam1Controller.text.isNotEmpty),
                                                                         ),
                                                                         SizedBox(
                                                                           height:
@@ -9296,15 +9805,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           readOnly: status == 'Pending' && designation != "QC"
                                                                               ? true
                                                                               : false,
-                                                                          // validator:
-                                                                          //     MultiValidator(
-                                                                          //   [
-                                                                          //     RequiredValidator(
-                                                                          //       errorText:
-                                                                          //           "Please Enter Obsevation ",
-                                                                          //     ),
-                                                                          //   ],
-                                                                          // ),
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Enter IR ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                         ),
                                                                         SizedBox(
                                                                           height:
@@ -9318,7 +9826,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                         ),
                                                                         TextFormField(
                                                                           controller:
-                                                                              hipIR2Controller,
+                                                                              hipIRCam2Controller,
                                                                           decoration:
                                                                               InputDecoration(
                                                                             hintText:
@@ -9332,12 +9840,12 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               onPressed: () async {
                                                                                 if (status != 'Pending') {
                                                                                   await _openCamera(
-                                                                                      hipIR2Controller,
+                                                                                      hipIRCam2Controller,
                                                                                       'IR_Image2',
                                                                                       /** image name */
                                                                                       'IR',
                                                                                       /*** Type  */
-                                                                                      'IR' /** Stage */
+                                                                                      'Hipot Test' /** Stage */
                                                                                       );
                                                                                 }
                                                                               },
@@ -9348,9 +9856,17 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           ),
                                                                           readOnly:
                                                                               true,
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Click Picture ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                           enabled: !(widget.id != null &&
                                                                               widget.id != '' &&
-                                                                              hipIR2Controller.text.isNotEmpty),
+                                                                              hipIRCam2Controller.text.isNotEmpty),
                                                                         ),
                                                                         SizedBox(
                                                                           height:
@@ -9381,15 +9897,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           readOnly: status == 'Pending' && designation != "QC"
                                                                               ? true
                                                                               : false,
-                                                                          // validator:
-                                                                          //     MultiValidator(
-                                                                          //   [
-                                                                          //     RequiredValidator(
-                                                                          //       errorText:
-                                                                          //           "Please Enter Obsevation ",
-                                                                          //     ),
-                                                                          //   ],
-                                                                          // ),
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Enter IR ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                         ),
                                                                         SizedBox(
                                                                           height:
@@ -9403,7 +9918,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                         ),
                                                                         TextFormField(
                                                                           controller:
-                                                                              hipIR3Controller,
+                                                                              hipIRCam3Controller,
                                                                           decoration:
                                                                               InputDecoration(
                                                                             hintText:
@@ -9417,12 +9932,12 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               onPressed: () async {
                                                                                 if (status != 'Pending') {
                                                                                   await _openCamera(
-                                                                                      hipIR3Controller,
+                                                                                      hipIRCam3Controller,
                                                                                       'IR_Image3',
                                                                                       /** image name */
                                                                                       'IR',
                                                                                       /*** Type  */
-                                                                                      'IR' /** Stage */
+                                                                                      'Hipot Test' /** Stage */
                                                                                       );
                                                                                 }
                                                                               },
@@ -9433,9 +9948,17 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           ),
                                                                           readOnly:
                                                                               true,
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Click Picture ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                           enabled: !(widget.id != null &&
                                                                               widget.id != '' &&
-                                                                              hipIR3Controller.text.isNotEmpty),
+                                                                              hipIRCam3Controller.text.isNotEmpty),
                                                                         ),
                                                                         SizedBox(
                                                                           height:
@@ -9466,15 +9989,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           readOnly: status == 'Pending' && designation != "QC"
                                                                               ? true
                                                                               : false,
-                                                                          // validator:
-                                                                          //     MultiValidator(
-                                                                          //   [
-                                                                          //     RequiredValidator(
-                                                                          //       errorText:
-                                                                          //           "Please Enter Obsevation ",
-                                                                          //     ),
-                                                                          //   ],
-                                                                          // ),
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Enter IR ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                         ),
                                                                         SizedBox(
                                                                           height:
@@ -9507,7 +10029,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       /** image name */
                                                                                       'IR',
                                                                                       /*** Type  */
-                                                                                      'IR' /** Stage */
+                                                                                      'Hipot Test' /** Stage */
                                                                                       );
                                                                                 }
                                                                               },
@@ -9518,6 +10040,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           ),
                                                                           readOnly:
                                                                               true,
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Click Picture ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                           enabled: !(widget.id != null &&
                                                                               widget.id != '' &&
                                                                               hipIR4Controller.text.isNotEmpty),
@@ -9551,15 +10081,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           readOnly: status == 'Pending' && designation != "QC"
                                                                               ? true
                                                                               : false,
-                                                                          // validator:
-                                                                          //     MultiValidator(
-                                                                          //   [
-                                                                          //     RequiredValidator(
-                                                                          //       errorText:
-                                                                          //           "Please Enter Obsevation ",
-                                                                          //     ),
-                                                                          //   ],
-                                                                          // ),
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Enter IR ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                         ),
                                                                         SizedBox(
                                                                           height:
@@ -9592,7 +10121,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       /** image name */
                                                                                       'IR',
                                                                                       /*** Type  */
-                                                                                      'IR' /** Stage */
+                                                                                      'Hipot Test' /** Stage */
                                                                                       );
                                                                                 }
                                                                               },
@@ -9603,6 +10132,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           ),
                                                                           readOnly:
                                                                               true,
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Click Picture ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                           enabled: !(widget.id != null &&
                                                                               widget.id != '' &&
                                                                               hipIR1Controller.text.isNotEmpty),
@@ -9721,15 +10258,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           readOnly: status == 'Pending' && designation != "QC"
                                                                               ? true
                                                                               : false,
-                                                                          // validator:
-                                                                          //     MultiValidator(
-                                                                          //   [
-                                                                          //     RequiredValidator(
-                                                                          //       errorText:
-                                                                          //           "Please Enter Obsevation ",
-                                                                          //     ),
-                                                                          //   ],
-                                                                          // ),
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Enter Ground Continuity ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                         ),
                                                                         SizedBox(
                                                                           height:
@@ -9762,7 +10298,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       /** image name */
                                                                                       'Ground_Continuity',
                                                                                       /*** Type  */
-                                                                                      'Ground Continuity' /** Stage */
+                                                                                      'Hipot Test' /** Stage */
                                                                                       );
                                                                                 }
                                                                               },
@@ -9773,6 +10309,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           ),
                                                                           readOnly:
                                                                               true,
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Click Picture ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                           enabled: !(widget.id != null &&
                                                                               widget.id != '' &&
                                                                               hipGCCam1Controller.text.isNotEmpty),
@@ -9806,15 +10350,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           readOnly: status == 'Pending' && designation != "QC"
                                                                               ? true
                                                                               : false,
-                                                                          // validator:
-                                                                          //     MultiValidator(
-                                                                          //   [
-                                                                          //     RequiredValidator(
-                                                                          //       errorText:
-                                                                          //           "Please Enter Obsevation ",
-                                                                          //     ),
-                                                                          //   ],
-                                                                          // ),
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Enter Ground Continuity ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                         ),
                                                                         SizedBox(
                                                                           height:
@@ -9847,7 +10390,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       /** image name */
                                                                                       'Ground_Continuity',
                                                                                       /*** Type  */
-                                                                                      'Ground Continuity' /** Stage */
+                                                                                      'Hipot Test' /** Stage */
                                                                                       );
                                                                                 }
                                                                               },
@@ -9858,6 +10401,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           ),
                                                                           readOnly:
                                                                               true,
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Click Picture ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                           enabled: !(widget.id != null &&
                                                                               widget.id != '' &&
                                                                               hipGCCam2Controller.text.isNotEmpty),
@@ -9891,15 +10442,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           readOnly: status == 'Pending' && designation != "QC"
                                                                               ? true
                                                                               : false,
-                                                                          // validator:
-                                                                          //     MultiValidator(
-                                                                          //   [
-                                                                          //     RequiredValidator(
-                                                                          //       errorText:
-                                                                          //           "Please Enter Obsevation ",
-                                                                          //     ),
-                                                                          //   ],
-                                                                          // ),
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Enter Ground Continuity ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                         ),
                                                                         SizedBox(
                                                                           height:
@@ -9932,7 +10482,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       /** image name */
                                                                                       'Ground_Continuity',
                                                                                       /*** Type  */
-                                                                                      'Ground Continuity' /** Stage */
+                                                                                      'Hipot Test' /** Stage */
                                                                                       );
                                                                                 }
                                                                               },
@@ -9943,6 +10493,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           ),
                                                                           readOnly:
                                                                               true,
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Click Picture ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                           enabled: !(widget.id != null &&
                                                                               widget.id != '' &&
                                                                               hipGCCam3Controller.text.isNotEmpty),
@@ -9976,15 +10534,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           readOnly: status == 'Pending' && designation != "QC"
                                                                               ? true
                                                                               : false,
-                                                                          // validator:
-                                                                          //     MultiValidator(
-                                                                          //   [
-                                                                          //     RequiredValidator(
-                                                                          //       errorText:
-                                                                          //           "Please Enter Obsevation ",
-                                                                          //     ),
-                                                                          //   ],
-                                                                          // ),
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Enter Ground Continuity ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                         ),
                                                                         SizedBox(
                                                                           height:
@@ -10017,7 +10574,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       /** image name */
                                                                                       'Ground_Continuity',
                                                                                       /*** Type  */
-                                                                                      'Ground Continuity' /** Stage */
+                                                                                      'Hipot Test' /** Stage */
                                                                                       );
                                                                                 }
                                                                               },
@@ -10028,6 +10585,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           ),
                                                                           readOnly:
                                                                               true,
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Click Picture ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                           enabled: !(widget.id != null &&
                                                                               widget.id != '' &&
                                                                               hipGCCam4Controller.text.isNotEmpty),
@@ -10061,15 +10626,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           readOnly: status == 'Pending' && designation != "QC"
                                                                               ? true
                                                                               : false,
-                                                                          // validator:
-                                                                          //     MultiValidator(
-                                                                          //   [
-                                                                          //     RequiredValidator(
-                                                                          //       errorText:
-                                                                          //           "Please Enter Obsevation ",
-                                                                          //     ),
-                                                                          //   ],
-                                                                          // ),
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Enter Ground Continuity ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                         ),
                                                                         SizedBox(
                                                                           height:
@@ -10102,7 +10666,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       /** image name */
                                                                                       'Ground_Continuity',
                                                                                       /*** Type  */
-                                                                                      'Ground Continuity' /** Stage */
+                                                                                      'Hipot Test' /** Stage */
                                                                                       );
                                                                                 }
                                                                               },
@@ -10113,6 +10677,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           ),
                                                                           readOnly:
                                                                               true,
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Click Picture ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                           enabled: !(widget.id != null &&
                                                                               widget.id != '' &&
                                                                               hipGCCam5Controller.text.isNotEmpty),
@@ -10234,15 +10806,14 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           readOnly: status == 'Pending' && designation != "QC"
                                                                               ? true
                                                                               : false,
-                                                                          // validator:
-                                                                          //     MultiValidator(
-                                                                          //   [
-                                                                          //     RequiredValidator(
-                                                                          //       errorText:
-                                                                          //           "Please Enter Obsevation ",
-                                                                          //     ),
-                                                                          //   ],
-                                                                          // ),
+                                                                          validator:
+                                                                              MultiValidator(
+                                                                            [
+                                                                              RequiredValidator(
+                                                                                errorText: "Please Enter Verification of Process Parameter ",
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                         ),
                                                                         SizedBox(
                                                                           height:
@@ -10324,11 +10895,11 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                           readOnly: status == 'Pending' && designation != "QC"
                                                                               ? true
                                                                               : false,
-                                                                          // validator: MultiValidator(
+                                                                          // validator:
+                                                                          //     MultiValidator(
                                                                           //   [
                                                                           //     RequiredValidator(
-                                                                          //       errorText:
-                                                                          //           "Please Enter Correct data",
+                                                                          //       errorText: "Please Enter  Remark",
                                                                           //     ),
                                                                           //   ],
                                                                           // ),
@@ -10353,17 +10924,27 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                 ),
                                                                                 onTap: () {
                                                                                   AppHelper.hideKeyboard(context);
-                                                                                  if (status != 'Pending') {
-                                                                                    setState(() {
-                                                                                      sendStatus = 'Inprogress';
-                                                                                    });
-                                                                                    createData();
-                                                                                  }
+                                                                                  // if (status != 'Pending') {
+                                                                                  //   setState(() {
+                                                                                  //     sendStatus = 'Inprogress';
+                                                                                  //   });
+                                                                                  //   // createData();
+                                                                                  // }
 
                                                                                   _postLamFormKey.currentState!.save;
-                                                                                  setState(() {
-                                                                                    setPage = 'finalel';
-                                                                                  });
+                                                                                  if (_postLamFormKey.currentState!.validate()) {
+                                                                                    if (status != 'Pending') {
+                                                                                      setState(() {
+                                                                                        sendStatus = 'Inprogress';
+                                                                                        // setPage = 'finalel';
+                                                                                      });
+                                                                                      createData();
+                                                                                    }
+                                                                                    // createData();
+                                                                                    setState(() {
+                                                                                      setPage = 'finalel';
+                                                                                    });
+                                                                                  }
                                                                                 },
                                                                                 label: "Next",
                                                                                 organization: '',
@@ -10549,14 +11130,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               ),
                                                                               style: AppStyles.textInputTextStyle,
                                                                               readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                              // validator:
-                                                                              //     MultiValidator(
-                                                                              //   [
-                                                                              //     RequiredValidator(
-                                                                              //       errorText: "Please Enter Obsevation ",
-                                                                              //     ),
-                                                                              //   ],
-                                                                              // ),
+                                                                              validator: MultiValidator(
+                                                                                [
+                                                                                  RequiredValidator(
+                                                                                    errorText: "Please Enter Voltage & Current Verification in DC power supply",
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                             ),
                                                                             const SizedBox(
                                                                               height: 15,
@@ -10630,14 +11210,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               ),
                                                                               style: AppStyles.textInputTextStyle,
                                                                               readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                              // validator:
-                                                                              //     MultiValidator(
-                                                                              //   [
-                                                                              //     RequiredValidator(
-                                                                              //       errorText: "Please Enter Obsevation ",
-                                                                              //     ),
-                                                                              //   ],
-                                                                              // ),
+                                                                              validator: MultiValidator(
+                                                                                [
+                                                                                  RequiredValidator(
+                                                                                    errorText: "Please Enter EL Inspection",
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                             ),
                                                                             SizedBox(
                                                                               height: 5,
@@ -10670,6 +11249,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                 border: const OutlineInputBorder(),
                                                                               ),
                                                                               readOnly: true,
+                                                                              validator: MultiValidator(
+                                                                                [
+                                                                                  RequiredValidator(
+                                                                                    errorText: "Please Click Picture ",
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                               enabled: !(widget.id != null && widget.id != '' && postELCam1Controller.text.isNotEmpty),
                                                                             ),
                                                                             SizedBox(
@@ -10686,14 +11272,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               ),
                                                                               style: AppStyles.textInputTextStyle,
                                                                               readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                              // validator:
-                                                                              //     MultiValidator(
-                                                                              //   [
-                                                                              //     RequiredValidator(
-                                                                              //       errorText: "Please Enter Obsevation ",
-                                                                              //     ),
-                                                                              //   ],
-                                                                              // ),
+                                                                              validator: MultiValidator(
+                                                                                [
+                                                                                  RequiredValidator(
+                                                                                    errorText: "Please Enter EL Inspection",
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                             ),
                                                                             SizedBox(
                                                                               height: 5,
@@ -10726,6 +11311,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                 border: const OutlineInputBorder(),
                                                                               ),
                                                                               readOnly: true,
+                                                                              validator: MultiValidator(
+                                                                                [
+                                                                                  RequiredValidator(
+                                                                                    errorText: "Please Click Picture ",
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                               enabled: !(widget.id != null && widget.id != '' && postELCam2Controller.text.isNotEmpty),
                                                                             ),
                                                                             SizedBox(
@@ -10742,14 +11334,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               ),
                                                                               style: AppStyles.textInputTextStyle,
                                                                               readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                              // validator:
-                                                                              //     MultiValidator(
-                                                                              //   [
-                                                                              //     RequiredValidator(
-                                                                              //       errorText: "Please Enter Obsevation ",
-                                                                              //     ),
-                                                                              //   ],
-                                                                              // ),
+                                                                              validator: MultiValidator(
+                                                                                [
+                                                                                  RequiredValidator(
+                                                                                    errorText: "Please Enter EL Inspection ",
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                             ),
                                                                             SizedBox(
                                                                               height: 5,
@@ -10782,6 +11373,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                 border: const OutlineInputBorder(),
                                                                               ),
                                                                               readOnly: true,
+                                                                              validator: MultiValidator(
+                                                                                [
+                                                                                  RequiredValidator(
+                                                                                    errorText: "Please Click Picture ",
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                               enabled: !(widget.id != null && widget.id != '' && postELCam3Controller.text.isNotEmpty),
                                                                             ),
                                                                             SizedBox(
@@ -10798,14 +11396,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               ),
                                                                               style: AppStyles.textInputTextStyle,
                                                                               readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                              // validator:
-                                                                              //     MultiValidator(
-                                                                              //   [
-                                                                              //     RequiredValidator(
-                                                                              //       errorText: "Please Enter Obsevation ",
-                                                                              //     ),
-                                                                              //   ],
-                                                                              // ),
+                                                                              validator: MultiValidator(
+                                                                                [
+                                                                                  RequiredValidator(
+                                                                                    errorText: "Please Enter EL Inspection ",
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                             ),
                                                                             SizedBox(
                                                                               height: 5,
@@ -10838,6 +11435,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                 border: const OutlineInputBorder(),
                                                                               ),
                                                                               readOnly: true,
+                                                                              validator: MultiValidator(
+                                                                                [
+                                                                                  RequiredValidator(
+                                                                                    errorText: "Please Click Picture ",
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                               enabled: !(widget.id != null && widget.id != '' && postELCam4Controller.text.isNotEmpty),
                                                                             ),
                                                                             SizedBox(
@@ -10854,14 +11458,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               ),
                                                                               style: AppStyles.textInputTextStyle,
                                                                               readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                              // validator:
-                                                                              //     MultiValidator(
-                                                                              //   [
-                                                                              //     RequiredValidator(
-                                                                              //       errorText: "Please Enter Obsevation ",
-                                                                              //     ),
-                                                                              //   ],
-                                                                              // ),
+                                                                              validator: MultiValidator(
+                                                                                [
+                                                                                  RequiredValidator(
+                                                                                    errorText: "Please Enter EL Inspection ",
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                             ),
                                                                             SizedBox(
                                                                               height: 5,
@@ -10880,7 +11483,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                   onPressed: () async {
                                                                                     if (status != 'Pending') {
                                                                                       await _openCamera(
-                                                                                          postELCam1Controller,
+                                                                                          postELCam5Controller,
                                                                                           'Post_EL_Test_Image5',
                                                                                           /** image name */
                                                                                           'EL Inspection',
@@ -10894,6 +11497,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                 border: const OutlineInputBorder(),
                                                                               ),
                                                                               readOnly: true,
+                                                                              validator: MultiValidator(
+                                                                                [
+                                                                                  RequiredValidator(
+                                                                                    errorText: "Please Click Picture ",
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                               enabled: !(widget.id != null && widget.id != '' && postELCam5Controller.text.isNotEmpty),
                                                                             ),
                                                                             const SizedBox(
@@ -10970,14 +11580,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               ),
                                                                               style: AppStyles.textInputTextStyle,
                                                                               readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                              // validator:
-                                                                              //     MultiValidator(
-                                                                              //   [
-                                                                              //     RequiredValidator(
-                                                                              //       errorText: "Please Enter Obsevation ",
-                                                                              //     ),
-                                                                              //   ],
-                                                                              // ),
+                                                                              validator: MultiValidator(
+                                                                                [
+                                                                                  RequiredValidator(
+                                                                                    errorText: "Please Enter Visual inspection ",
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                             ),
                                                                             SizedBox(
                                                                               height: 5,
@@ -11001,7 +11610,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                           /** image name */
                                                                                           'Visual_inspection',
                                                                                           /*** Type  */
-                                                                                          'Visual inspection' /** Stage */
+                                                                                          'Post EL Test' /** Stage */
                                                                                           );
                                                                                     }
                                                                                   },
@@ -11010,6 +11619,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                 border: const OutlineInputBorder(),
                                                                               ),
                                                                               readOnly: true,
+                                                                              validator: MultiValidator(
+                                                                                [
+                                                                                  RequiredValidator(
+                                                                                    errorText: "Please Click Picture ",
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                               enabled: !(widget.id != null && widget.id != '' && postVICam1Controller.text.isNotEmpty),
                                                                             ),
                                                                             SizedBox(
@@ -11026,14 +11642,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               ),
                                                                               style: AppStyles.textInputTextStyle,
                                                                               readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                              // validator:
-                                                                              //     MultiValidator(
-                                                                              //   [
-                                                                              //     RequiredValidator(
-                                                                              //       errorText: "Please Enter Obsevation ",
-                                                                              //     ),
-                                                                              //   ],
-                                                                              // ),
+                                                                              validator: MultiValidator(
+                                                                                [
+                                                                                  RequiredValidator(
+                                                                                    errorText: "Please Enter Visual inspection ",
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                             ),
                                                                             SizedBox(
                                                                               height: 5,
@@ -11057,7 +11672,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                           /** image name */
                                                                                           'Visual_inspection',
                                                                                           /*** Type  */
-                                                                                          'Visual inspection' /** Stage */
+                                                                                          'Post EL Test' /** Stage */
                                                                                           );
                                                                                     }
                                                                                   },
@@ -11066,6 +11681,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                 border: const OutlineInputBorder(),
                                                                               ),
                                                                               readOnly: true,
+                                                                              validator: MultiValidator(
+                                                                                [
+                                                                                  RequiredValidator(
+                                                                                    errorText: "Please Click Picture ",
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                               enabled: !(widget.id != null && widget.id != '' && postVICam2Controller.text.isNotEmpty),
                                                                             ),
                                                                             SizedBox(
@@ -11082,14 +11704,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               ),
                                                                               style: AppStyles.textInputTextStyle,
                                                                               readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                              // validator:
-                                                                              //     MultiValidator(
-                                                                              //   [
-                                                                              //     RequiredValidator(
-                                                                              //       errorText: "Please Enter Obsevation ",
-                                                                              //     ),
-                                                                              //   ],
-                                                                              // ),
+                                                                              validator: MultiValidator(
+                                                                                [
+                                                                                  RequiredValidator(
+                                                                                    errorText: "Please Enter Visual inspection ",
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                             ),
                                                                             SizedBox(
                                                                               height: 5,
@@ -11113,7 +11734,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                           /** image name */
                                                                                           'Visual_inspection',
                                                                                           /*** Type  */
-                                                                                          'Visual inspection' /** Stage */
+                                                                                          'Post EL Test' /** Stage */
                                                                                           );
                                                                                     }
                                                                                   },
@@ -11122,6 +11743,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                 border: const OutlineInputBorder(),
                                                                               ),
                                                                               readOnly: true,
+                                                                              validator: MultiValidator(
+                                                                                [
+                                                                                  RequiredValidator(
+                                                                                    errorText: "Please Click Picture ",
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                               enabled: !(widget.id != null && widget.id != '' && postVICam3Controller.text.isNotEmpty),
                                                                             ),
                                                                             SizedBox(
@@ -11138,14 +11766,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               ),
                                                                               style: AppStyles.textInputTextStyle,
                                                                               readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                              // validator:
-                                                                              //     MultiValidator(
-                                                                              //   [
-                                                                              //     RequiredValidator(
-                                                                              //       errorText: "Please Enter Obsevation ",
-                                                                              //     ),
-                                                                              //   ],
-                                                                              // ),
+                                                                              validator: MultiValidator(
+                                                                                [
+                                                                                  RequiredValidator(
+                                                                                    errorText: "Please Enter Visual inspection ",
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                             ),
                                                                             SizedBox(
                                                                               height: 5,
@@ -11169,7 +11796,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                           /** image name */
                                                                                           'Visual_inspection',
                                                                                           /*** Type  */
-                                                                                          'Visual inspection' /** Stage */
+                                                                                          'Post EL Test' /** Stage */
                                                                                           );
                                                                                     }
                                                                                   },
@@ -11178,6 +11805,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                 border: const OutlineInputBorder(),
                                                                               ),
                                                                               readOnly: true,
+                                                                              validator: MultiValidator(
+                                                                                [
+                                                                                  RequiredValidator(
+                                                                                    errorText: "Please Click Picture ",
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                               enabled: !(widget.id != null && widget.id != '' && postVICam4Controller.text.isNotEmpty),
                                                                             ),
                                                                             SizedBox(
@@ -11194,14 +11828,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               ),
                                                                               style: AppStyles.textInputTextStyle,
                                                                               readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                              // validator:
-                                                                              //     MultiValidator(
-                                                                              //   [
-                                                                              //     RequiredValidator(
-                                                                              //       errorText: "Please Enter Obsevation ",
-                                                                              //     ),
-                                                                              //   ],
-                                                                              // ),
+                                                                              validator: MultiValidator(
+                                                                                [
+                                                                                  RequiredValidator(
+                                                                                    errorText: "Please Enter Visual inspection ",
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                             ),
                                                                             SizedBox(
                                                                               height: 5,
@@ -11225,7 +11858,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                           /** image name */
                                                                                           'Visual_inspection',
                                                                                           /*** Type  */
-                                                                                          'Visual inspection' /** Stage */
+                                                                                          'Post EL Test' /** Stage */
                                                                                           );
                                                                                     }
                                                                                   },
@@ -11234,6 +11867,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                 border: const OutlineInputBorder(),
                                                                               ),
                                                                               readOnly: true,
+                                                                              validator: MultiValidator(
+                                                                                [
+                                                                                  RequiredValidator(
+                                                                                    errorText: "Please Click Picture ",
+                                                                                  ),
+                                                                                ],
+                                                                              ),
                                                                               enabled: !(widget.id != null && widget.id != '' && postVICam5Controller.text.isNotEmpty),
                                                                             ),
                                                                             SizedBox(
@@ -11289,8 +11929,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                               // validator: MultiValidator(
                                                                               //   [
                                                                               //     RequiredValidator(
-                                                                              //       errorText:
-                                                                              //           "Please Enter Correct data",
+                                                                              //       errorText: "Please Enter  Remark",
                                                                               //     ),
                                                                               //   ],
                                                                               // ),
@@ -11310,17 +11949,27 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                     ),
                                                                                     onTap: () {
                                                                                       AppHelper.hideKeyboard(context);
-                                                                                      if (status != 'Pending') {
-                                                                                        setState(() {
-                                                                                          sendStatus = 'Inprogress';
-                                                                                        });
-                                                                                        createData();
-                                                                                      }
+                                                                                      // if (status != 'Pending') {
+                                                                                      //   setState(() {
+                                                                                      //     sendStatus = 'Inprogress';
+                                                                                      //   });
+                                                                                      //   // createData();
+                                                                                      // }
 
                                                                                       _postLamFormKey.currentState!.save;
-                                                                                      setState(() {
-                                                                                        setPage = 'rfid';
-                                                                                      });
+                                                                                      if (_postLamFormKey.currentState!.validate()) {
+                                                                                        if (status != 'Pending') {
+                                                                                          setState(() {
+                                                                                            sendStatus = 'Inprogress';
+                                                                                            // setPage = 'rfid';
+                                                                                          });
+                                                                                          createData();
+                                                                                        }
+                                                                                        // createData();
+                                                                                        setState(() {
+                                                                                          setPage = 'rfid';
+                                                                                        });
+                                                                                      }
                                                                                     },
                                                                                     label: "Next",
                                                                                     organization: '',
@@ -11496,13 +12145,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                   ),
                                                                                   style: AppStyles.textInputTextStyle,
                                                                                   readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                                  // validator: MultiValidator(
-                                                                                  //   [
-                                                                                  //     RequiredValidator(
-                                                                                  //       errorText: "Please Enter Obsevation ",
-                                                                                  //     ),
-                                                                                  //   ],
-                                                                                  // ),
+                                                                                  validator: MultiValidator(
+                                                                                    [
+                                                                                      RequiredValidator(
+                                                                                        errorText: "Please Enter RFID Position ",
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
                                                                                 ),
                                                                                 const SizedBox(
                                                                                   height: 15,
@@ -11577,13 +12226,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                   ),
                                                                                   style: AppStyles.textInputTextStyle,
                                                                                   readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                                  // validator: MultiValidator(
-                                                                                  //   [
-                                                                                  //     RequiredValidator(
-                                                                                  //       errorText: "Please Enter Observation ",
-                                                                                  //     ),
-                                                                                  //   ],
-                                                                                  // ),
+                                                                                  validator: MultiValidator(
+                                                                                    [
+                                                                                      RequiredValidator(
+                                                                                        errorText: "Please Enter Cell & Module Make & Manufacturing Month Verification ",
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
                                                                                 ),
                                                                                 const SizedBox(
                                                                                   height: 15,
@@ -11632,8 +12281,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                   // validator: MultiValidator(
                                                                                   //   [
                                                                                   //     RequiredValidator(
-                                                                                  //       errorText:
-                                                                                  //           "Please Enter Correct data",
+                                                                                  //       errorText: "Please Enter  Remark",
                                                                                   //     ),
                                                                                   //   ],
                                                                                   // ),
@@ -11653,17 +12301,27 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                         ),
                                                                                         onTap: () {
                                                                                           AppHelper.hideKeyboard(context);
-                                                                                          if (status != 'Pending') {
-                                                                                            setState(() {
-                                                                                              sendStatus = 'Inprogress';
-                                                                                            });
-                                                                                            createData();
-                                                                                          }
+                                                                                          // if (status != 'Pending') {
+                                                                                          //   setState(() {
+                                                                                          //     sendStatus = 'Inprogress';
+                                                                                          //   });
+                                                                                          //   // createData();
+                                                                                          // }
 
                                                                                           _postLamFormKey.currentState!.save;
-                                                                                          setState(() {
-                                                                                            setPage = 'finalVisual';
-                                                                                          });
+                                                                                          if (_postLamFormKey.currentState!.validate()) {
+                                                                                            if (status != 'Pending') {
+                                                                                              setState(() {
+                                                                                                sendStatus = 'Inprogress';
+                                                                                                // setPage = 'finalVisual';
+                                                                                              });
+                                                                                              createData();
+                                                                                            }
+                                                                                            // createData();
+                                                                                            setState(() {
+                                                                                              setPage = 'finalVisual';
+                                                                                            });
+                                                                                          }
                                                                                         },
                                                                                         label: "Next",
                                                                                         organization: '',
@@ -11824,7 +12482,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       height: 5,
                                                                                     ),
                                                                                     TextFormField(
-                                                                                      controller: finalVI2Controller,
+                                                                                      controller: finalVI1Controller,
                                                                                       keyboardType: TextInputType.text,
                                                                                       textInputAction: TextInputAction.next,
                                                                                       decoration: AppStyles.textFieldInputDecoration.copyWith(
@@ -11834,14 +12492,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       ),
                                                                                       style: AppStyles.textInputTextStyle,
                                                                                       readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                                      // validator:
-                                                                                      //     MultiValidator(
-                                                                                      //   [
-                                                                                      //     RequiredValidator(
-                                                                                      //       errorText: "Please Enter Obsevation ",
-                                                                                      //     ),
-                                                                                      //   ],
-                                                                                      // ),
+                                                                                      validator: MultiValidator(
+                                                                                        [
+                                                                                          RequiredValidator(
+                                                                                            errorText: "Please Enter Visual inspection ",
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
                                                                                     ),
                                                                                     SizedBox(
                                                                                       height: 5,
@@ -11874,6 +12531,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                         border: const OutlineInputBorder(),
                                                                                       ),
                                                                                       readOnly: true,
+                                                                                      validator: MultiValidator(
+                                                                                        [
+                                                                                          RequiredValidator(
+                                                                                            errorText: "Please Click Picture ",
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
                                                                                       enabled: !(widget.id != null && widget.id != '' && finalVICam1Controller.text.isNotEmpty),
                                                                                     ),
                                                                                     SizedBox(
@@ -11890,14 +12554,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       ),
                                                                                       style: AppStyles.textInputTextStyle,
                                                                                       readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                                      // validator:
-                                                                                      //     MultiValidator(
-                                                                                      //   [
-                                                                                      //     RequiredValidator(
-                                                                                      //       errorText: "Please Enter Obsevation ",
-                                                                                      //     ),
-                                                                                      //   ],
-                                                                                      // ),
+                                                                                      validator: MultiValidator(
+                                                                                        [
+                                                                                          RequiredValidator(
+                                                                                            errorText: "Please Enter Visual inspection ",
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
                                                                                     ),
                                                                                     SizedBox(
                                                                                       height: 5,
@@ -11930,6 +12593,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                         border: const OutlineInputBorder(),
                                                                                       ),
                                                                                       readOnly: true,
+                                                                                      validator: MultiValidator(
+                                                                                        [
+                                                                                          RequiredValidator(
+                                                                                            errorText: "Please Click Picture ",
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
                                                                                       enabled: !(widget.id != null && widget.id != '' && finalVICam2Controller.text.isNotEmpty),
                                                                                     ),
                                                                                     SizedBox(
@@ -11947,14 +12617,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       ),
                                                                                       style: AppStyles.textInputTextStyle,
                                                                                       readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                                      // validator:
-                                                                                      //     MultiValidator(
-                                                                                      //   [
-                                                                                      //     RequiredValidator(
-                                                                                      //       errorText: "Please Enter Obsevation ",
-                                                                                      //     ),
-                                                                                      //   ],
-                                                                                      // ),
+                                                                                      validator: MultiValidator(
+                                                                                        [
+                                                                                          RequiredValidator(
+                                                                                            errorText: "Please Enter Visual inspection ",
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
                                                                                     ),
                                                                                     SizedBox(
                                                                                       height: 5,
@@ -11987,6 +12656,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                         border: const OutlineInputBorder(),
                                                                                       ),
                                                                                       readOnly: true,
+                                                                                      validator: MultiValidator(
+                                                                                        [
+                                                                                          RequiredValidator(
+                                                                                            errorText: "Please Click Picture ",
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
                                                                                       enabled: !(widget.id != null && widget.id != '' && finalVICam3Controller.text.isNotEmpty),
                                                                                     ),
                                                                                     SizedBox(
@@ -12003,14 +12679,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       ),
                                                                                       style: AppStyles.textInputTextStyle,
                                                                                       readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                                      // validator:
-                                                                                      //     MultiValidator(
-                                                                                      //   [
-                                                                                      //     RequiredValidator(
-                                                                                      //       errorText: "Please Enter Obsevation ",
-                                                                                      //     ),
-                                                                                      //   ],
-                                                                                      // ),
+                                                                                      validator: MultiValidator(
+                                                                                        [
+                                                                                          RequiredValidator(
+                                                                                            errorText: "Please Enter Visual inspection ",
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
                                                                                     ),
                                                                                     SizedBox(
                                                                                       height: 5,
@@ -12043,6 +12718,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                         border: const OutlineInputBorder(),
                                                                                       ),
                                                                                       readOnly: true,
+                                                                                      validator: MultiValidator(
+                                                                                        [
+                                                                                          RequiredValidator(
+                                                                                            errorText: "Please Click Picture ",
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
                                                                                       enabled: !(widget.id != null && widget.id != '' && finalVICam4Controller.text.isNotEmpty),
                                                                                     ),
                                                                                     SizedBox(
@@ -12059,14 +12741,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       ),
                                                                                       style: AppStyles.textInputTextStyle,
                                                                                       readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                                      // validator:
-                                                                                      //     MultiValidator(
-                                                                                      //   [
-                                                                                      //     RequiredValidator(
-                                                                                      //       errorText: "Please Enter Obsevation ",
-                                                                                      //     ),
-                                                                                      //   ],
-                                                                                      // ),
+                                                                                      validator: MultiValidator(
+                                                                                        [
+                                                                                          RequiredValidator(
+                                                                                            errorText: "Please Enter Visual inspection ",
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
                                                                                     ),
                                                                                     SizedBox(
                                                                                       height: 5,
@@ -12099,6 +12780,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                         border: const OutlineInputBorder(),
                                                                                       ),
                                                                                       readOnly: true,
+                                                                                      validator: MultiValidator(
+                                                                                        [
+                                                                                          RequiredValidator(
+                                                                                            errorText: "Please Click Picture ",
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
                                                                                       enabled: !(widget.id != null && widget.id != '' && finalVICam5Controller.text.isNotEmpty),
                                                                                     ),
 
@@ -12170,14 +12858,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       ),
                                                                                       style: AppStyles.textInputTextStyle,
                                                                                       readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                                      // validator:
-                                                                                      //     MultiValidator(
-                                                                                      //   [
-                                                                                      //     RequiredValidator(
-                                                                                      //       errorText: "Please Enter Obsevation ",
-                                                                                      //     ),
-                                                                                      //   ],
-                                                                                      // ),
+                                                                                      validator: MultiValidator(
+                                                                                        [
+                                                                                          RequiredValidator(
+                                                                                            errorText: "Please Enter Backlabel ",
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
                                                                                     ),
                                                                                     SizedBox(
                                                                                       height: 5,
@@ -12210,6 +12897,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                         border: const OutlineInputBorder(),
                                                                                       ),
                                                                                       readOnly: true,
+                                                                                      validator: MultiValidator(
+                                                                                        [
+                                                                                          RequiredValidator(
+                                                                                            errorText: "Please Click Picture ",
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
                                                                                       enabled: !(widget.id != null && widget.id != '' && finalBackCam1Controller.text.isNotEmpty),
                                                                                     ),
                                                                                     SizedBox(
@@ -12226,14 +12920,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       ),
                                                                                       style: AppStyles.textInputTextStyle,
                                                                                       readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                                      // validator:
-                                                                                      //     MultiValidator(
-                                                                                      //   [
-                                                                                      //     RequiredValidator(
-                                                                                      //       errorText: "Please Enter Obsevation ",
-                                                                                      //     ),
-                                                                                      //   ],
-                                                                                      // ),
+                                                                                      validator: MultiValidator(
+                                                                                        [
+                                                                                          RequiredValidator(
+                                                                                            errorText: "Please Enter Backlabel ",
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
                                                                                     ),
                                                                                     SizedBox(
                                                                                       height: 5,
@@ -12266,6 +12959,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                         border: const OutlineInputBorder(),
                                                                                       ),
                                                                                       readOnly: true,
+                                                                                      validator: MultiValidator(
+                                                                                        [
+                                                                                          RequiredValidator(
+                                                                                            errorText: "Please Click Picture ",
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
                                                                                       enabled: !(widget.id != null && widget.id != '' && finalBackCam2Controller.text.isNotEmpty),
                                                                                     ),
                                                                                     SizedBox(
@@ -12282,14 +12982,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       ),
                                                                                       style: AppStyles.textInputTextStyle,
                                                                                       readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                                      // validator:
-                                                                                      //     MultiValidator(
-                                                                                      //   [
-                                                                                      //     RequiredValidator(
-                                                                                      //       errorText: "Please Enter Obsevation ",
-                                                                                      //     ),
-                                                                                      //   ],
-                                                                                      // ),
+                                                                                      validator: MultiValidator(
+                                                                                        [
+                                                                                          RequiredValidator(
+                                                                                            errorText: "Please Enter Backlabel ",
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
                                                                                     ),
                                                                                     SizedBox(
                                                                                       height: 5,
@@ -12322,6 +13021,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                         border: const OutlineInputBorder(),
                                                                                       ),
                                                                                       readOnly: true,
+                                                                                      validator: MultiValidator(
+                                                                                        [
+                                                                                          RequiredValidator(
+                                                                                            errorText: "Please Click Picture ",
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
                                                                                       enabled: !(widget.id != null && widget.id != '' && finalBackCam3Controller.text.isNotEmpty),
                                                                                     ),
 
@@ -12339,14 +13045,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       ),
                                                                                       style: AppStyles.textInputTextStyle,
                                                                                       readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                                      // validator:
-                                                                                      //     MultiValidator(
-                                                                                      //   [
-                                                                                      //     RequiredValidator(
-                                                                                      //       errorText: "Please Enter Obsevation ",
-                                                                                      //     ),
-                                                                                      //   ],
-                                                                                      // ),
+                                                                                      validator: MultiValidator(
+                                                                                        [
+                                                                                          RequiredValidator(
+                                                                                            errorText: "Please Enter Backlabel ",
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
                                                                                     ),
                                                                                     SizedBox(
                                                                                       height: 5,
@@ -12379,6 +13084,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                         border: const OutlineInputBorder(),
                                                                                       ),
                                                                                       readOnly: true,
+                                                                                      validator: MultiValidator(
+                                                                                        [
+                                                                                          RequiredValidator(
+                                                                                            errorText: "Please Click Picture ",
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
                                                                                       enabled: !(widget.id != null && widget.id != '' && finalBackCam4Controller.text.isNotEmpty),
                                                                                     ),
                                                                                     const SizedBox(
@@ -12395,14 +13107,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       ),
                                                                                       style: AppStyles.textInputTextStyle,
                                                                                       readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                                      // validator:
-                                                                                      //     MultiValidator(
-                                                                                      //   [
-                                                                                      //     RequiredValidator(
-                                                                                      //       errorText: "Please Enter Obsevation ",
-                                                                                      //     ),
-                                                                                      //   ],
-                                                                                      // ),
+                                                                                      validator: MultiValidator(
+                                                                                        [
+                                                                                          RequiredValidator(
+                                                                                            errorText: "Please Enter Backlabel ",
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
                                                                                     ),
                                                                                     SizedBox(
                                                                                       height: 5,
@@ -12435,6 +13146,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                         border: const OutlineInputBorder(),
                                                                                       ),
                                                                                       readOnly: true,
+                                                                                      validator: MultiValidator(
+                                                                                        [
+                                                                                          RequiredValidator(
+                                                                                            errorText: "Please Click Picture ",
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
                                                                                       enabled: !(widget.id != null && widget.id != '' && finalBackCam5Controller.text.isNotEmpty),
                                                                                     ),
                                                                                     const SizedBox(
@@ -12482,8 +13200,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                       // validator: MultiValidator(
                                                                                       //   [
                                                                                       //     RequiredValidator(
-                                                                                      //       errorText:
-                                                                                      //           "Please Enter Correct data",
+                                                                                      //       errorText: "Please Enter  Remark",
                                                                                       //     ),
                                                                                       //   ],
                                                                                       // ),
@@ -12503,16 +13220,26 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                             ),
                                                                                             onTap: () {
                                                                                               AppHelper.hideKeyboard(context);
-                                                                                              if (status != 'Pending') {
-                                                                                                setState(() {
-                                                                                                  sendStatus = 'Inprogress';
-                                                                                                });
-                                                                                                createData();
-                                                                                              }
+                                                                                              // if (status != 'Pending') {
+                                                                                              //   setState(() {
+                                                                                              //     sendStatus = 'Inprogress';
+                                                                                              //   });
+                                                                                              //   // createData();
+                                                                                              // }
                                                                                               _postLamFormKey.currentState!.save;
-                                                                                              setState(() {
-                                                                                                setPage = 'finalvisual';
-                                                                                              });
+                                                                                              if (_postLamFormKey.currentState!.validate()) {
+                                                                                                if (status != 'Pending') {
+                                                                                                  setState(() {
+                                                                                                    sendStatus = 'Inprogress';
+                                                                                                    // setPage = 'finalvisual';
+                                                                                                  });
+                                                                                                  createData();
+                                                                                                }
+                                                                                                // createData();
+                                                                                                setState(() {
+                                                                                                  setPage = 'finalvisual';
+                                                                                                });
+                                                                                              }
                                                                                             },
                                                                                             label: "Next",
                                                                                             organization: '',
@@ -12681,13 +13408,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                           ),
                                                                                           style: AppStyles.textInputTextStyle,
                                                                                           readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                                          // validator: MultiValidator(
-                                                                                          //   [
-                                                                                          //     RequiredValidator(
-                                                                                          //       errorText: "Please Enter Observation ",
-                                                                                          //     ),
-                                                                                          //   ],
-                                                                                          // ),
+                                                                                          validator: MultiValidator(
+                                                                                            [
+                                                                                              RequiredValidator(
+                                                                                                errorText: "Please Enter L*W and Module Profile ",
+                                                                                              ),
+                                                                                            ],
+                                                                                          ),
                                                                                         ),
                                                                                         const SizedBox(
                                                                                           height: 15,
@@ -12762,13 +13489,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                           ),
                                                                                           style: AppStyles.textInputTextStyle,
                                                                                           readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                                          // validator: MultiValidator(
-                                                                                          //   [
-                                                                                          //     RequiredValidator(
-                                                                                          //       errorText: "Please Enter Observation ",
-                                                                                          //     ),
-                                                                                          //   ],
-                                                                                          // ),
+                                                                                          validator: MultiValidator(
+                                                                                            [
+                                                                                              RequiredValidator(
+                                                                                                errorText: "Please Enter  Mounting Hole X & Y Pitch ",
+                                                                                              ),
+                                                                                            ],
+                                                                                          ),
                                                                                         ),
                                                                                         const SizedBox(
                                                                                           height: 15,
@@ -12838,13 +13565,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                           ),
                                                                                           style: AppStyles.textInputTextStyle,
                                                                                           readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                                          // validator: MultiValidator(
-                                                                                          //   [
-                                                                                          //     RequiredValidator(
-                                                                                          //       errorText: "Please Enter Observation ",
-                                                                                          //     ),
-                                                                                          //   ],
-                                                                                          // ),
+                                                                                          validator: MultiValidator(
+                                                                                            [
+                                                                                              RequiredValidator(
+                                                                                                errorText: "Please Enter Diagonal Difference ",
+                                                                                              ),
+                                                                                            ],
+                                                                                          ),
                                                                                         ),
                                                                                         const SizedBox(
                                                                                           height: 15,
@@ -12914,13 +13641,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                           ),
                                                                                           style: AppStyles.textInputTextStyle,
                                                                                           readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                                          // validator: MultiValidator(
-                                                                                          //   [
-                                                                                          //     RequiredValidator(
-                                                                                          //       errorText: "Please Enter Observation ",
-                                                                                          //     ),
-                                                                                          //   ],
-                                                                                          // ),
+                                                                                          validator: MultiValidator(
+                                                                                            [
+                                                                                              RequiredValidator(
+                                                                                                errorText: "Please Enter Corner Gap ",
+                                                                                              ),
+                                                                                            ],
+                                                                                          ),
                                                                                         ),
                                                                                         const SizedBox(
                                                                                           height: 15,
@@ -12990,13 +13717,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                           ),
                                                                                           style: AppStyles.textInputTextStyle,
                                                                                           readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                                          // validator: MultiValidator(
-                                                                                          //   [
-                                                                                          //     RequiredValidator(
-                                                                                          //       errorText: "Please Enter Observation ",
-                                                                                          //     ),
-                                                                                          //   ],
-                                                                                          // ),
+                                                                                          validator: MultiValidator(
+                                                                                            [
+                                                                                              RequiredValidator(
+                                                                                                errorText: "Please Enter JB Cable length ",
+                                                                                              ),
+                                                                                            ],
+                                                                                          ),
                                                                                         ),
                                                                                         const SizedBox(
                                                                                           height: 15,
@@ -13051,8 +13778,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                           // validator: MultiValidator(
                                                                                           //   [
                                                                                           //     RequiredValidator(
-                                                                                          //       errorText:
-                                                                                          //           "Please Enter Correct data",
+                                                                                          //       errorText: "Please Enter  Remark",
                                                                                           //     ),
                                                                                           //   ],
                                                                                           // ),
@@ -13073,17 +13799,23 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                                 ),
                                                                                                 onTap: () {
                                                                                                   AppHelper.hideKeyboard(context);
-                                                                                                  if (status != 'Pending') {
-                                                                                                    setState(() {
-                                                                                                      sendStatus = 'Inprogress';
-                                                                                                    });
-                                                                                                    createData();
-                                                                                                  }
+                                                                                                  // if (status != 'Pending') {
+                                                                                                  //   setState(() {
+                                                                                                  //     sendStatus = 'Inprogress';
+                                                                                                  //   });
+                                                                                                  //   // createData();
+                                                                                                  // }
 
                                                                                                   _postLamFormKey.currentState!.save;
-                                                                                                  setState(() {
-                                                                                                    setPage = 'packaging';
-                                                                                                  });
+                                                                                                  if (_postLamFormKey.currentState!.validate()) {
+                                                                                                    if (status != 'Pending') {
+                                                                                                      createData();
+                                                                                                      sendStatus = 'Inprogress';
+                                                                                                    }
+                                                                                                    setState(() {
+                                                                                                      setPage = 'packaging';
+                                                                                                    });
+                                                                                                  }
                                                                                                 },
                                                                                                 label: "Next",
                                                                                                 organization: '',
@@ -13260,13 +13992,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                               ),
                                                                                               style: AppStyles.textInputTextStyle,
                                                                                               readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                                              // validator: MultiValidator(
-                                                                                              //   [
-                                                                                              //     RequiredValidator(
-                                                                                              //       errorText: "Please Enter Observation ",
-                                                                                              //     ),
-                                                                                              //   ],
-                                                                                              // ),
+                                                                                              validator: MultiValidator(
+                                                                                                [
+                                                                                                  RequiredValidator(
+                                                                                                    errorText: "Please Enter Packaging Label ",
+                                                                                                  ),
+                                                                                                ],
+                                                                                              ),
                                                                                             ),
                                                                                             const SizedBox(
                                                                                               height: 15,
@@ -13339,13 +14071,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                               ),
                                                                                               style: AppStyles.textInputTextStyle,
                                                                                               readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                                              // validator: MultiValidator(
-                                                                                              //   [
-                                                                                              //     RequiredValidator(
-                                                                                              //       errorText: "Please Enter Observation ",
-                                                                                              //     ),
-                                                                                              //   ],
-                                                                                              // ),
+                                                                                              validator: MultiValidator(
+                                                                                                [
+                                                                                                  RequiredValidator(
+                                                                                                    errorText: "Please Enter Content in Box ",
+                                                                                                  ),
+                                                                                                ],
+                                                                                              ),
                                                                                             ),
                                                                                             const SizedBox(
                                                                                               height: 15,
@@ -13418,13 +14150,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                               ),
                                                                                               style: AppStyles.textInputTextStyle,
                                                                                               readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                                              // validator: MultiValidator(
-                                                                                              //   [
-                                                                                              //     RequiredValidator(
-                                                                                              //       errorText: "Please Enter Observation ",
-                                                                                              //     ),
-                                                                                              //   ],
-                                                                                              // ),
+                                                                                              validator: MultiValidator(
+                                                                                                [
+                                                                                                  RequiredValidator(
+                                                                                                    errorText: "Please Enter Box Condition ",
+                                                                                                  ),
+                                                                                                ],
+                                                                                              ),
                                                                                             ),
                                                                                             const SizedBox(
                                                                                               height: 15,
@@ -13497,13 +14229,13 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                               ),
                                                                                               style: AppStyles.textInputTextStyle,
                                                                                               readOnly: status == 'Pending' && designation != "QC" ? true : false,
-                                                                                              // validator: MultiValidator(
-                                                                                              //   [
-                                                                                              //     RequiredValidator(
-                                                                                              //       errorText: "Please Enter Observation ",
-                                                                                              //     ),
-                                                                                              //   ],
-                                                                                              // ),
+                                                                                              validator: MultiValidator(
+                                                                                                [
+                                                                                                  RequiredValidator(
+                                                                                                    errorText: "Please Enter  Wooden Pallet dimension",
+                                                                                                  ),
+                                                                                                ],
+                                                                                              ),
                                                                                             ),
                                                                                             const SizedBox(
                                                                                               height: 15,
@@ -13561,8 +14293,7 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                               // validator: MultiValidator(
                                                                                               //   [
                                                                                               //     RequiredValidator(
-                                                                                              //       errorText:
-                                                                                              //           "Please Enter Correct data",
+                                                                                              //       errorText: "Please Enter  Remark",
                                                                                               //     ),
                                                                                               //   ],
                                                                                               // ),
@@ -13570,45 +14301,45 @@ class _PostlamBaliyaliState extends State<PostlamBaliyali> {
                                                                                             SizedBox(
                                                                                               height: 10,
                                                                                             ),
-                                                                                            Text(
-                                                                                              "Reference PDF Document ",
-                                                                                              style: AppStyles.textfieldCaptionTextStyle,
-                                                                                            ),
-                                                                                            const SizedBox(
-                                                                                              height: 5,
-                                                                                            ),
-                                                                                            TextFormField(
-                                                                                              controller: referencePdfController,
-                                                                                              keyboardType: TextInputType.text,
-                                                                                              textInputAction: TextInputAction.next,
-                                                                                              decoration: AppStyles.textFieldInputDecoration.copyWith(
-                                                                                                  hintText: "Please Select Reference Pdf",
-                                                                                                  fillColor: Color.fromARGB(255, 215, 243, 207),
-                                                                                                  suffixIcon: IconButton(
-                                                                                                    onPressed: () async {
-                                                                                                      if (widget.id != null && widget.id != '' && referencePdfController.text != '') {
-                                                                                                        UrlLauncher.launch(referencePdfController.text);
-                                                                                                      } else if (status != 'Pending') {
-                                                                                                        // _pickReferencePDF();
-                                                                                                      }
-                                                                                                    },
-                                                                                                    icon: widget.id != null && widget.id != '' && referencePdfController.text != '' ? const Icon(Icons.download) : const Icon(Icons.upload_file),
-                                                                                                  ),
-                                                                                                  counterText: ''),
-                                                                                              style: AppStyles.textInputTextStyle,
-                                                                                              maxLines: 1,
-                                                                                              readOnly: true,
-                                                                                              validator: (value) {
-                                                                                                if (value!.isEmpty) {
-                                                                                                  return "Please Select Reference Pdf";
-                                                                                                } else {
-                                                                                                  return null;
-                                                                                                }
-                                                                                              },
-                                                                                            ),
-                                                                                            const SizedBox(
-                                                                                              height: 15,
-                                                                                            ),
+                                                                                            // Text(
+                                                                                            //   "Reference PDF Document ",
+                                                                                            //   style: AppStyles.textfieldCaptionTextStyle,
+                                                                                            // ),
+                                                                                            // const SizedBox(
+                                                                                            //   height: 5,
+                                                                                            // ),
+                                                                                            // TextFormField(
+                                                                                            //   controller: referencePdfController,
+                                                                                            //   keyboardType: TextInputType.text,
+                                                                                            //   textInputAction: TextInputAction.next,
+                                                                                            //   decoration: AppStyles.textFieldInputDecoration.copyWith(
+                                                                                            //       hintText: "Please Select Reference Pdf",
+                                                                                            //       fillColor: Color.fromARGB(255, 215, 243, 207),
+                                                                                            //       suffixIcon: IconButton(
+                                                                                            //         onPressed: () async {
+                                                                                            //           if (widget.id != null && widget.id != '' && referencePdfController.text != '') {
+                                                                                            //             UrlLauncher.launch(referencePdfController.text);
+                                                                                            //           } else if (status != 'Pending') {
+                                                                                            //             _pickReferencePDF();
+                                                                                            //           }
+                                                                                            //         },
+                                                                                            //         icon: widget.id != null && widget.id != '' && referencePdfController.text != '' ? const Icon(Icons.download) : const Icon(Icons.upload_file),
+                                                                                            //       ),
+                                                                                            //       counterText: ''),
+                                                                                            //   style: AppStyles.textInputTextStyle,
+                                                                                            //   maxLines: 1,
+                                                                                            //   readOnly: true,
+                                                                                            //   validator: (value) {
+                                                                                            //     if (value!.isEmpty) {
+                                                                                            //       return "Please Select Reference Pdf";
+                                                                                            //     } else {
+                                                                                            //       return null;
+                                                                                            //     }
+                                                                                            //   },
+                                                                                            // ),
+                                                                                            // const SizedBox(
+                                                                                            //   height: 15,
+                                                                                            // ),
 
                                                                                             Padding(padding: EdgeInsets.fromLTRB(0, 10, 0, 0)),
                                                                                             _isLoading
